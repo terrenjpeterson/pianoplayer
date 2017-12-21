@@ -1,0 +1,23 @@
+{
+  "name": "amazon_alexa_piano_player",
+  "version": "1.0.0",
+  "description": "An Alexa skill that helps you learn how to play the piano.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/terrenjpeterson/pianoplayer.git"
+  },
+  "keywords": [
+    "alexa",
+    "piano",
+    "teacher"
+  ],
+  "author": "Terren Peterson",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "alexa-sdk": "^1.0.24"
+  }
+}
