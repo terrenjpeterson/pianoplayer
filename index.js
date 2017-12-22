@@ -135,21 +135,27 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
         this.emit(':ask', helpMessage, helpMessage);
     },
     'Welcome': function() {
-     	var repeatMessage = "Would you like to try again? If so, please say - Repeat.";
+	const message = "Welcome to the Piano Teacher skill. This skill helps " +
+	    "to teach beginners how to play the piano.";
+     	const repeatMessage = "Are you ready to get started? Say something like, " +
+	    "Which songs are available, for a list of what I can teach.";
 
 	console.log("Playing Welcome Function");
 	//console.log(JSON.stringify(this.event));
 
+	this.emit(':ask', message, repeatMessage);
+    },
+    // this plays the basic scale
+    'BasicScale': function() {
+	console.log("Play the basic C Major scale.");
+
         // VideoApp.Play directives can be added to the response
         if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-            //const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/BasicScale.mp4';
-	    const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/SilentNight.mp4';
-	    //const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/MaryHadLittleLamb.mp4';
-	    //const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/test.mp4';
+	    const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/BasicScale.mp4';
 	    //this.response.playVideo(videoClip).listen(repeatMessage);
 	    const metadata = {
-		'title': 'Silent Night',
-		'subtitle': 'composed by Franz Xaver Gruber 1818'
+		'title': 'Basic Note Drill'
+		//'subtitle': 'composed by Franz Xaver Gruber 1818'
 	    };
 	    this.response.playVideo(videoClip, metadata);
             console.log("Invoked from video playing device");
@@ -160,7 +166,6 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
         }
 
 	this.emit(':responseReady');
-    	//this.emit(':ask', message, message);
     },
     // this is the function that is invoked when the user requests a song to be played
     'PlaySong': function() {
@@ -189,6 +194,26 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	    this.response.speak("Sorry, I can't find " + slots.SongName.value + ".");
 	}
 	this.emit(':responseReady');
+    },
+    // this is the function that returns all the available songs to be played
+    'ListSongs': function() {
+	console.log("List available songs.");
+	
+	var message = "Here are the songs currently available. ";
+	var repromptMessage = "Would you like me to teach you a song? " +
+	    "Just say something like, Teach me how to play " + 
+	    songs[0].requestName + ", and I will given instructions on how " +
+	    "to play the notes on a piano.";
+
+	console.log("Build song list");
+	// get all of the song names from the array
+        for (i = 0; i < songs.length; i++ ) {
+	    message = message + songs[i].requestName + ", "
+	}
+	message = message + "Just say something like, Teach me how to play " +
+	    songs[0].requestName + ".";
+
+	this.emit(':ask', message, repromptMessage);
     },
     'Unhandled': function () {
 	console.log("Unhandled event");
