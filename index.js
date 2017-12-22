@@ -145,10 +145,16 @@ var startGameHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
         // VideoApp.Play directives can be added to the response
         if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-            const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/BasicScale.mp4';
+            //const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/BasicScale.mp4';
+	    const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/SilentNight.mp4';
+	    //const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/MaryHadLittleLamb.mp4';
 	    //const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/test.mp4';
 	    //this.response.playVideo(videoClip).listen(repeatMessage);
-	    this.response.playVideo(videoClip);
+	    const metadata = {
+		'title': 'Silent Night',
+		'subtitle': 'composed by Franz Xaver Gruber 1818'
+	    };
+	    this.response.playVideo(videoClip, metadata);
             console.log("Invoked from video playing device");
         } else {
             this.response.speak("The video cannot be played on your device. " +
