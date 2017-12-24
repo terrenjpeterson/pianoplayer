@@ -11,7 +11,12 @@ const makeImage     = Alexa.utils.ImageUtils.makeImage;
 
 var songs = [
     { "requestName":"silent night", "videoObject":"SilentNight.mp4" },
-    { "requestName":"mary had a little lamb", "videoObject":"MaryHadLittleLamb.mp4" }
+    { "requestName":"mary had a little lamb", "videoObject":"MaryHadLittleLamb.mp4" },
+    { "requestName":"star spangled banner", "videoObject":"StarSpangledBanner.mp4" },
+    { "requestName":"twinkle twinkle little star", "videoObject":"TwinkleTwinkle.mp4" },
+    { "requestName":"happy birthday", "videoObject":"HappyBirthday.mp4" },
+    { "requestName":"ode to joy", "videoObject":"OdeToJoy.mp4" },
+    { "requestName":"london bridget", "videoObject":"LondonBridge.mp4" }
 ];
 
 // valid states in the game
@@ -79,15 +84,15 @@ var newSessionHandler = {
     this.handler.state = states.STARTMODE;
     // Display.RenderTemplate directives can be added to the response
     const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
-    const imageLoc = 'https://s3.amazonaws.com/drinkrecommender/media/drinkBackground.png';
-    const template = builder.setTitle('Your Personal Bartender')
+    const imageLoc = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
+    const template = builder.setTitle('Your Personal Instructor')
 							.setBackgroundImage(makeImage(imageLoc))
-							.setTextContent(makePlainText('Drink Recommender'))
+							.setTextContent(makePlainText('Piano Teacher'))
 							.build();
 
     if (this.event.context.System.device.supportedInterfaces.Display) {
-	//this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
-	this.response.speak(welcomeMessage).listen(repeatWelcomeMessage);
+	this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
+	//this.response.speak(welcomeMessage).listen(repeatWelcomeMessage);
         this.emit(':responseReady');
 	console.log("this was requested by an Echo Show");
     } else {
@@ -99,9 +104,10 @@ var newSessionHandler = {
     this.emit(':ask', helpMessage, helpMessage);
   },
   'Unhandled': function () {
+    const unhandledMessage = "Hmm, something isn't working with this request.";
     console.log("Unhandled intent");
     this.handler.state = states.STARTMODE;
-    this.emit(':ask', promptToStartMessage, promptToStartMessage);
+    this.emit(':ask', unhandledMessage, unhandledMessage);
   }
 };
 
@@ -167,6 +173,28 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
 	this.emit(':responseReady');
     },
+    // this plays the basic scale
+    'ReverseScale': function() {
+        console.log("Play the basic C Major scale in reverse.");
+
+        // VideoApp.Play directives can be added to the response
+        if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+            const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/DownScale.mp4';
+            //this.response.playVideo(videoClip).listen(repeatMessage);
+            const metadata = {
+                'title': 'Reverse Note Drill'
+                //'subtitle': 'composed by Franz Xaver Gruber 1818'
+            };
+            this.response.playVideo(videoClip, metadata);
+            console.log("Invoked from video playing device");
+        } else {
+            this.response.speak("The video cannot be played on your device. " +
+                "To watch this video, try launching the skill from your echo show device.");
+            console.log("Cannot play video from this device");
+        }
+
+        this.emit(':responseReady');
+    },
     // this is the function that is invoked when the user requests a song to be played
     'PlaySong': function() {
 	const slots = this.event.request.intent.slots;
@@ -188,7 +216,10 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	if (validSong) {
 	    console.log("returned media stream.");
 	    const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/' + videoObject;
-	    this.response.playVideo(videoClip);
+            const metadata = {
+                'title': slots.SongName.value
+            };
+	    this.response.playVideo(videoClip, metadata);
 	} else {
 	    console.log("returned error message.");
 	    this.response.speak("Sorry, I can't find " + slots.SongName.value + ".");
@@ -217,6 +248,7 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
     },
     'Unhandled': function () {
 	console.log("Unhandled event");
-        this.emit(':ask', promptToStartMessage, promptToStartMessage);
+	const unhandledMessage = "Something didn't work on this.";
+        this.emit(':ask', unhandledMessage, unhandledMessage);
     }
 });
