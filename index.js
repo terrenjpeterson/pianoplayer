@@ -1,6 +1,5 @@
 /**
  * This is the piano player skill for Amazon Alexa
- *
  */
 
 var Alexa = require('alexa-sdk');
@@ -9,26 +8,12 @@ var Alexa = require('alexa-sdk');
 const makePlainText = Alexa.utils.TextUtils.makePlainText;
 const makeImage     = Alexa.utils.ImageUtils.makeImage;
 
-var songs = [
-    { "requestName":"silent night", "videoObject":"SilentNight.mp4" },
-    { "requestName":"mary had a little lamb", "videoObject":"MaryHadLittleLamb.mp4" },
-    { "requestName":"star spangled banner", "videoObject":"StarSpangledBanner.mp4" },
-    { "requestName":"twinkle twinkle little star", "videoObject":"TwinkleTwinkle.mp4" },
-    { "requestName":"happy birthday", "videoObject":"HappyBirthday.mp4" },
-    { "requestName":"ode to joy", "videoObject":"OdeToJoy.mp4" },
-    { "requestName":"london bridget", "videoObject":"LondonBridge.mp4" }
-];
+var songs = require("songs.json");
 
-// valid states in the game
+// valid states in the skill
 var states = {
-    STARTMODE: '_STARTMODE',                // Prompt the user to start or restart the game.
-    ASKMODE: '_ASKMODE',                    // Alexa is asking user the questions.
-    DESCRIPTIONMODE: '_DESCRIPTIONMODE'     // Alexa is describing the final choice and prompting to start again or quit
+    STARTMODE: '_STARTMODE'
 };
-
-// Questions
-//var nodes = require("data/questions.json");
-var nodes = [];
 
 // this is used for keep track of visted nodes when we test for loops in the tree
 var visited;
@@ -36,20 +21,16 @@ var visited;
 // These are messages that Alexa says to the user during conversation
 
 // This is the intial welcome message
-//var welcomeMessage = "Welcome to drink recommender. I will ask you multiple questions that you should answer yes or no. Based on your choices, I will identify a drink for you and provide some details on ingredients and how to make it - or where it can be purchased. Are you ready to begin?";
-var welcomeMessage = "Welcome to piano player. Your personal piano teacher. Say begin if you are ready.";
+var welcomeMessage = "Welcome to piano teacher. Your personal piano teacher. " 
+    "Ask me to teach you a song to begin, or say, List Songs, for which I know.";
 
 // This is the message that is repeated if the response to the initial welcome message is not heard
-var repeatWelcomeMessage = "Say yes to start the drink recommendation generator, or no to quit.";
+var repeatWelcomeMessage = "You are currently using the piano teacher skill. This skill is designed " +
+    "to teach beginner lessons on the piano. Say something like, Teach me how to play " +
+    "Mary Had a Little Lamb, to get started.";
 
 // this is the message that is repeated if Alexa does not hear/understand the reponse to the welcome message
-var promptToStartMessage = "Say yes to continue, or no to end the activity.";
-
-// This is the prompt during the game when Alexa doesnt hear or understand a yes / no reply
-var promptToSayYesNo = "Say yes or no to answer the question.";
-
-// This is the response to the user after the final question when Alex decides on what group choice the user should be given
-var decisionMessage = "Based on exhaustive research, I recommend a";
+var promptToStartMessage = "Say something like, List Songs, to get started.";
 
 // This is the prompt to ask the user if they would like to hear a short description of thier chosen profession or to play again
 var playAgainMessage = "Say 'tell me more' to hear a short description about the drink, or do you want to try again?";
@@ -65,7 +46,7 @@ var utteranceTellMeMore = "tell me more";
 var utterancePlayAgain = "play again";
 
 // the first node that we will use
-var START_NODE = 1;
+//var START_NODE = 1;
 
 // --------------- Handlers -----------------------
 
@@ -77,56 +58,77 @@ exports.handler = function (event, context, callback) {
     alexa.execute();
 };
 
-// set state to start up and  welcome the user
+// set state to start up
 var newSessionHandler = {
-  'LaunchRequest': function () {
-    console.log("Launch Request");
-    this.handler.state = states.STARTMODE;
-    // Display.RenderTemplate directives can be added to the response
-    const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
-    const imageLoc = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
-    const template = builder.setTitle('Your Personal Instructor')
-							.setBackgroundImage(makeImage(imageLoc))
-							.setTextContent(makePlainText('Piano Teacher'))
-							.build();
+    'Welcome': function () {
+        console.log("Launch Request");
+	// move next utterance to use start mode
+	this.handler.state = states.STARTMODE;
+        // Display.RenderTemplate directives can be added to the response
+        const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
+        const imageLoc = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
+        const template = builder.setTitle('Your Personal Instructor')
+                                                        .setBackgroundImage(makeImage(imageLoc))
+                                                        .setTextContent(makePlainText('Piano Teacher'))
+                                                        .build();
 
-    if (this.event.context.System.device.supportedInterfaces.Display) {
-	this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
-	//this.response.speak(welcomeMessage).listen(repeatWelcomeMessage);
-        this.emit(':responseReady');
-	console.log("this was requested by an Echo Show");
-    } else {
-    	this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
+        if (this.event.context.System.device.supportedInterfaces.Display) {
+            this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
+            this.emit(':responseReady');
+            console.log("this was requested by an Echo Show");
+        } else {
+            this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
+        }
+    },
+    'LaunchRequest': function () {
+        console.log("Launch Request");
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+        // Display.RenderTemplate directives can be added to the response
+        const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
+        const imageLoc = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
+        const template = builder.setTitle('Your Personal Instructor')
+                                                        .setBackgroundImage(makeImage(imageLoc))
+                                                        .setTextContent(makePlainText('Piano Teacher'))
+                                                        .build();
+
+        if (this.event.context.System.device.supportedInterfaces.Display) {
+            this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
+            this.emit(':responseReady');
+            console.log("this was requested by an Echo Show");
+        } else {
+            this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
+        }
+    },
+    'Unhandled': function () {
+        console.log("Unhandled event");
+        console.log(JSON.stringify(this.event));
+        const unhandledMessage = "Something didn't work on this.";
+        this.emit(':ask', unhandledMessage, unhandledMessage);
     }
-  },
-  'AMAZON.HelpIntent': function () {
-    this.handler.state = states.STARTMODE;
-    this.emit(':ask', helpMessage, helpMessage);
-  },
-  'Unhandled': function () {
-    const unhandledMessage = "Hmm, something isn't working with this request.";
-    console.log("Unhandled intent");
-    this.handler.state = states.STARTMODE;
-    this.emit(':ask', unhandledMessage, unhandledMessage);
-  }
 };
 
 // --------------- Functions that control the skill's behavior -----------------------
 
 // Called at the start of the game, picks and asks first question for the user
 var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
-    'AMAZON.YesIntent': function () {
-	console.log("Starting function");
+    'Welcome': function () {
+    	console.log("Launch Request");
+    	// Display.RenderTemplate directives can be added to the response
+    	const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
+    	const imageLoc = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
+    	const template = builder.setTitle('Your Personal Instructor')
+							.setBackgroundImage(makeImage(imageLoc))
+							.setTextContent(makePlainText('Piano Teacher'))
+							.build();
 
-        // ask first question, the response will be handled in the askQuestionHandler
-        var message = 'video device test message';
-
-        // ask the first question
-        this.emit(':ask', message, message);
-    },
-    'AMAZON.NoIntent': function () {
-        // Handle No intent.
-        this.emit(':tell', goodbyeMessage);
+    	if (this.event.context.System.device.supportedInterfaces.Display) {
+	    this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
+            this.emit(':responseReady');
+  	    console.log("this was requested by an Echo Show");
+    	} else {
+    	    this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
+    	}
     },
     'AMAZON.StopIntent': function () {
         this.emit(':tell', goodbyeMessage);
@@ -173,7 +175,7 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
 	this.emit(':responseReady');
     },
-    // this plays the basic scale
+    // this plays the basic scale in reverse
     'ReverseScale': function() {
         console.log("Play the basic C Major scale in reverse.");
 
@@ -204,25 +206,59 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
 	var validSong = false;
 	var videoObject = "";
-	for (i = 0; i < songs.length; i++ ) {
-	    if (slots.SongName.value.toLowerCase() === songs[i].requestName.toLowerCase()) {
-		console.log("User requested valid song.");
-		validSong = true;
-		videoObject = songs[i].videoObject;
+	var audioObject = "";
+
+	if (slots.SongName.value) {
+	    for (i = 0; i < songs.length; i++ ) {
+	    	if (slots.SongName.value.toLowerCase() === songs[i].requestName.toLowerCase()) {
+		    console.log("User requested valid song.");
+		    validSong = true;
+		    videoObject = songs[i].videoObject;
+		    audioObject = songs[i].audioObject;
+		}
 	    }
 	}
 
-	// if the song is valid, send back the video stream for the mp4 file, else error message
+	// check to see if the song is valid
 	if (validSong) {
-	    console.log("returned media stream.");
-	    const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/' + videoObject;
-            const metadata = {
-                'title': slots.SongName.value
-            };
-	    this.response.playVideo(videoClip, metadata);
+	    // send back the video stream for the mp4 file
+	    if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+	    	console.log("returned media stream.");
+	    	const videoClip = 'https://s3.amazonaws.com/pianoplayerskill/media/' + videoObject;
+            	const metadata = {
+                    'title': slots.SongName.value
+            	};
+	    	this.response.playVideo(videoClip, metadata);
+	    } else {
+		// else play a non-video version of the response
+		console.log("playing audio version of song " + slots.SongName.value + ".");
+		const audioMessage = 'Okay, get ready to play ' + slots.SongName.value + '.' +
+		    '<break time="3s"/>' +
+		    '<audio src=\"https://s3.amazonaws.com/pianoplayerskill/audio/' +
+		    audioObject + '\" />' +
+                    '<break time="3s"/>' +
+		    'Would you like to play again?';
+		this.response.speak(audioMessage);
+		this.response.listen("Would you like to try another song? Just ask for it now.");
+	    }
+	} else if (!slots.SongName.value) {
+	    // error message for no song name provided
+	    console.log("did not provide a song name.");
+            const repeatMessage = "Would you like me to teach you a song? If so, please provide me " +
+                "the song name. For example, say something like, Teach me how to play Twinkle Twinkle " +
+                "Little Star.";
+	    this.response.speak("Sorry, I didn't hear a song name. Which song do you want to learn?");
+	    this.response.listen(repeatMessage);
 	} else {
-	    console.log("returned error message.");
-	    this.response.speak("Sorry, I can't find " + slots.SongName.value + ".");
+	    // error message for a song name provided that wasn't valid
+	    console.log("returned invalid song name error message.");
+	    const notFoundMessage = "Sorry, I can't find " + slots.SongName.value + ". If you " +
+		"would like to know the songs I do know, say List Songs.";
+	    const repeatMessage = "Would you like me to teach you a song? If so, please provide me " +
+		"the song name. For example, say something like, Teach me how to play Twinkle Twinkle " +
+		"Little Star.";
+	    this.response.speak(notFoundMessage);
+            this.response.listen(repeatMessage); 
 	}
 	this.emit(':responseReady');
     },
@@ -248,6 +284,7 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
     },
     'Unhandled': function () {
 	console.log("Unhandled event");
+        console.log(JSON.stringify(this.event));
 	const unhandledMessage = "Something didn't work on this.";
         this.emit(':ask', unhandledMessage, unhandledMessage);
     }

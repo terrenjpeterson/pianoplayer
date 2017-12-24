@@ -3,7 +3,7 @@
 
 # create temp zip file with build package contents
 echo 'zipping up files'
-zip -r pianobot.zip index.js node_modules/ > temp.log
+zip -r pianobot.zip index.js songs.json node_modules/ > temp.log
 echo 'build file created'
 
 # stage the temp file in s3
