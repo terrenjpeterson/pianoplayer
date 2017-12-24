@@ -1,0 +1,265 @@
+{
+  "languageModel": {
+    "types": [
+      {
+        "name": "Songs",
+        "values": [
+          {
+            "id": null,
+            "name": {
+              "value": "Silent Night",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Happy Birthday",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Twinkle Twinkle Little Star",
+              "synonyms": [
+                "Twinkle Twinkle"
+              ]
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Jingle Bells",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Joy to the World",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Go Tell it on the Mountain",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Star Spangled Banner",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Minuet in G",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Old MacDonald's Farm",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Auld Lang Syne",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Mary Had a Little Lamb",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Seventh Inning Stretch",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "London Bridge is Falling Down",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "3 Blind Mice",
+              "synonyms": []
+            }
+          },
+          {
+            "id": null,
+            "name": {
+              "value": "Ode to Joy",
+              "synonyms": []
+            }
+          }
+        ]
+      }
+    ],
+    "intents": [
+      {
+        "name": "AMAZON.CancelIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.HelpIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.MoreIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.NavigateSettingsIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.NextIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.PageDownIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.PageUpIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.PauseIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.PreviousIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.ScrollDownIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.ScrollLeftIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.ScrollRightIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.ScrollUpIntent",
+        "samples": []
+      },
+      {
+        "name": "AMAZON.StopIntent",
+        "samples": []
+      },
+      {
+        "name": "BasicScale",
+        "samples": [
+          "Play the scale",
+          "Teach me how to play the scale",
+          "Teach me a lesson"
+        ],
+        "slots": []
+      },
+      {
+        "name": "ListSongs",
+        "samples": [
+          "List Songs",
+          "List Available Songs",
+          "Which Songs can you play",
+          "Which Songs are available"
+        ],
+        "slots": []
+      },
+      {
+        "name": "PlaySong",
+        "samples": [
+          "Play {SongName}",
+          "Teach me how to play {SongName}",
+          "How do you play {SongName}",
+          "What are the notes to {SongName}"
+        ],
+        "slots": [
+          {
+            "name": "SongName",
+            "type": "Songs",
+            "samples": [
+              "{SongName}",
+              "Play {SongName}"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "ReverseScale",
+        "samples": [
+          "Teach me another lesson",
+          "Teach me how to play the scale in reverse",
+          "How do you play the scale in reverse",
+          "How to play C major scale"
+        ],
+        "slots": []
+      },
+      {
+        "name": "Welcome",
+        "samples": [
+          "Begin",
+          "Welcome",
+          "Launch"
+        ],
+        "slots": []
+      }
+    ],
+    "invocationName": "piano teacher"
+  },
+  "prompts": [
+    {
+      "id": "Elicit.Intent-PlaySong.IntentSlot-SongName",
+      "variations": [
+        {
+          "type": "PlainText",
+          "value": "Which songs?"
+        }
+      ]
+    }
+  ],
+  "dialog": {
+    "intents": [
+      {
+        "name": "PlaySong",
+        "confirmationRequired": false,
+        "prompts": {},
+        "slots": [
+          {
+            "name": "SongName",
+            "type": "Songs",
+            "elicitationRequired": true,
+            "confirmationRequired": false,
+            "prompts": {
+              "elicitation": "Elicit.Intent-PlaySong.IntentSlot-SongName"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
