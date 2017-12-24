@@ -1,24 +1,24 @@
 {
   "session": {
-    "new": false,
-    "sessionId": "SessionId.2553b810-2484-4142-ae28-0d115c9e12fe",
+    "new": true,
+    "sessionId": "SessionId.69a2e9f7-2c03-4970-b7c2-c9aa72f99f3c",
     "application": {
       "applicationId": "amzn1.ask.skill.1de392e9-962b-4a51-9e53-e7001299efa3"
     },
     "attributes": {},
     "user": {
-      "userId": "amzn1.ask.account.AHVOFI4FK4PVGKIF22VIZ52VHEE3YXGMOO67XMJL6IOHA2RNBJCHRC3I5XCKNDPFZ2ITXL4LDJRDYBHJFW74BA7QU4SXIAICXVQ7QSBLX7UKXXQVSQALLOT5VLHZOKZQQGOTTKYPDLXHCJBV5MLSIFFGC5DW6EXQYGTWFPZMJZLNRNBIB2Q4VXJJR5KWLQUIVZBVNQR4Y52IYOA"
+      "userId": "amzn1.ask.account.A123"
     }
   },
   "request": {
     "type": "IntentRequest",
-    "requestId": "EdwRequestId.ba117ba9-908d-445b-a48c-717e1ab1eaba",
+    "requestId": "EdwRequestId.8c4baa96-5c4c-47cb-aca3-9c5bf0618fd9",
     "intent": {
-      "name": "ListSongs",
+      "name": "Welcome",
       "slots": {}
     },
     "locale": "en-US",
-    "timestamp": "2017-12-24T17:22:32Z"
+    "timestamp": "2017-12-24T18:35:44Z"
   },
   "context": {
     "AudioPlayer": {
@@ -29,7 +29,7 @@
         "applicationId": "amzn1.ask.skill.1de392e9-962b-4a51-9e53-e7001299efa3"
       },
       "user": {
-        "userId": "amzn1.ask.account.AHVOFI4FK4PVGKIF22VIZ52VHEE3YXGMOO67XMJL6IOHA2RNBJCHRC3I5XCKNDPFZ2ITXL4LDJRDYBHJFW74BA7QU4SXIAICXVQ7QSBLX7UKXXQVSQALLOT5VLHZOKZQQGOTTKYPDLXHCJBV5MLSIFFGC5DW6EXQYGTWFPZMJZLNRNBIB2Q4VXJJR5KWLQUIVZBVNQR4Y52IYOA"
+        "userId": "amzn1.ask.account.A123"
       },
       "device": {
         "supportedInterfaces": {
