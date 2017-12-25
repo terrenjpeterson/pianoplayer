@@ -109,7 +109,155 @@ var newSessionHandler = {
         }
     },
     'AMAZON.HelpIntent': function () {
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
         this.emit(':ask', helpMessage, helpMessage);
+    },
+    // this plays the basic scale
+    'BasicScale': function() {
+	console.log("Play the basic C Major scale.");
+
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+	// If the device is able to play video pass video, else audio
+        if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+	    const videoClip = videoLoc + 'BasicScale.mp4';
+	    const metadata = {
+		'title': 'Basic Note Drill'
+	    };
+	    this.response.playVideo(videoClip, metadata);
+            console.log("Invoked from video playing device");
+        } else {
+            const audioMessage = 'Okay, get ready to play the scale starting with the ' +
+		'middle C, then go up a white key until you hit the high C.' +
+                '<break time="3s"/>' +
+                '<audio src=\"' + audioLoc + 'PianoScale.mp3\" />' +
+                '<break time="3s"/>' +
+                'Would you like to play again? If so, say, Play the scale. ' +
+		'If you would like to play in reverse, say, Play scale in reverse.';
+	    const repeatMessage = 'If you want to try again, say, Play the scale. ' +
+		'To play in reverse, say, Play scale in reverse.';
+
+            this.response.speak(audioMessage).listen(repeatMessage);
+            console.log("Playing from non-video device");
+        }
+	this.emit(':responseReady');
+    },
+    // this plays the basic scale in reverse
+    'ReverseScale': function() {
+        console.log("Play the basic C Major scale in reverse.");
+
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+	// If the device is able to play video pass video, else audio
+        if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+            const videoClip = videoLoc + 'DownScale.mp4';
+            const metadata = {
+                'title': 'Reverse Note Drill'
+            };
+            this.response.playVideo(videoClip, metadata);
+            console.log("Invoked from video playing device");
+        } else {
+            const audioMessage = 'Okay, get ready to play the scale in reverse starting with the ' +
+                'high C, then go up a white key until you hit the middle C.' +
+                '<break time="3s"/>' +
+                '<audio src=\"' + audioLoc + 'DownScale.mp3\" />' +
+                '<break time="3s"/>' +
+                'Would you like to play again? If so, say, Play the scale in reverse. ' +
+                'If you would are ready to play a song, say, List songs, then select one.';
+            const repeatMessage = 'If you want to try again, say, Play scale in reverse. ' +
+                'To play going back up, please say, Play the scale.';
+
+            this.response.speak(audioMessage).listen(repeatMessage);
+            console.log("Playing from non-video device");
+        }
+
+        this.emit(':responseReady');
+    },
+    // this is the function that is invoked when the user requests a song to be played
+    'PlaySong': function() {
+	const slots = this.event.request.intent.slots;
+	var message = "Play Song " + slots.SongName.value + ".";
+
+	console.log("Play Song " + slots.SongName.value + " requested.");
+
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+	var validSong = false;
+	var videoObject = "";
+	var audioObject = "";
+
+	if (slots.SongName.value) {
+	    for (i = 0; i < songs.length; i++ ) {
+	    	if (slots.SongName.value.toLowerCase() === songs[i].requestName.toLowerCase()) {
+		    console.log("User requested valid song.");
+		    validSong = true;
+		    videoObject = songs[i].videoObject;
+		    audioObject = songs[i].audioObject;
+		}
+	    }
+	}
+
+	// check to see if the song is valid
+	if (validSong) {
+	    // send back the video stream for the mp4 file
+	    if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+	    	console.log("returned media stream.");
+	    	const videoClip = videoLoc + videoObject;
+            	const metadata = {
+                    'title': slots.SongName.value
+            	};
+	    	this.response.playVideo(videoClip, metadata);
+	    } else {
+		// else play a non-video version of the response
+		console.log("playing audio version of song " + slots.SongName.value + ".");
+		const audioMessage = 'Okay, get ready to play ' + slots.SongName.value + '.' +
+		    '<break time="3s"/>' +
+		    '<audio src=\"' + audioLoc + audioObject + '\" />' +
+                    '<break time="3s"/>' +
+		    'Would you like to play again? If so, please say, Teach me how to play ' +
+		    slots.SongName.value + ".";
+		this.response.speak(audioMessage);
+		this.response.listen("Would you like to try another song? Just ask for it now.");
+	    }
+	} else if (!slots.SongName.value) {
+	    // error message for no song name provided
+	    console.log("did not provide a song name.");
+	    this.response.speak(noSongMessage).listen(noSongRepeatMessage);
+	} else {
+	    // error message for a song name provided that wasn't valid
+	    console.log("returned invalid song name error message.");
+	    const notFoundMessage = "Sorry, I can't find " + slots.SongName.value + ". If you " +
+		"would like to know the songs I do know, say List Songs.";
+	    this.response.speak(notFoundMessage).listen(noSongRepeatMessage); 
+	}
+	this.emit(':responseReady');
+    },
+    // this is the function that returns all the available songs to be played
+    'ListSongs': function() {
+	console.log("List available songs.");
+	
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+	var message = "Here are the songs currently available. ";
+	var repromptMessage = "Would you like me to teach you a song? " +
+	    "Just say something like, Teach me how to play " + 
+	    songs[0].requestName + ", and I will given instructions on how " +
+	    "to play the notes on a piano.";
+
+	console.log("Build song list");
+	// get all of the song names from the array
+        for (i = 0; i < songs.length; i++ ) {
+	    message = message + songs[i].requestName + ", "
+	}
+	message = message + "Just say something like, Teach me how to play " +
+	    songs[0].requestName + ".";
+
+	this.emit(':ask', message, repromptMessage);
     },
     'Unhandled': function () {
         console.log("Unhandled event");
