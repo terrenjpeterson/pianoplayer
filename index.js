@@ -49,7 +49,7 @@ const musicBackground = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKe
 
 // These are the folders where the mp3 & mp4 files are located
 const audioLoc = 'https://s3.amazonaws.com/pianoplayerskill/audio/';
-const videoLoc = 'https://s3.amazonaws.com/pianoplayerskill/video/';
+const videoLoc = 'https://s3.amazonaws.com/pianoplayerskill/media/';
 
 // --------------- Handlers -----------------------
 
