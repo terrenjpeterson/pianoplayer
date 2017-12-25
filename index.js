@@ -57,6 +57,7 @@ const videoLoc = 'https://s3.amazonaws.com/pianoplayerskill/video/';
 exports.handler = function (event, context, callback) {
     var alexa = Alexa.handler(event, context);
     alexa.appId = 'amzn1.ask.skill.1de392e9-962b-4a51-9e53-e7001299efa3';
+    alexa.dynamoDBTableName = 'PianoEchoShow';
     alexa.registerHandlers(newSessionHandler, startLessonHandlers);
     alexa.execute();
 };
@@ -77,9 +78,11 @@ var newSessionHandler = {
 
         if (this.event.context.System.device.supportedInterfaces.Display) {
             this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
-            this.emit(':responseReady');
+	    this.attributes['EchoShow'] = true;
             console.log("this was requested by an Echo Show");
+            this.emit(':responseReady');
         } else {
+            this.attributes['EchoShow'] = false;
             this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
         }
     },
@@ -97,11 +100,16 @@ var newSessionHandler = {
 
         if (this.event.context.System.device.supportedInterfaces.Display) {
             this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
-            this.emit(':responseReady');
             console.log("this was requested by an Echo Show");
+            this.attributes['EchoShow'] = true;
+            this.emit(':responseReady');
         } else {
+            this.attributes['EchoShow'] = false;
             this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
         }
+    },
+    'AMAZON.HelpIntent': function () {
+        this.emit(':ask', helpMessage, helpMessage);
     },
     'Unhandled': function () {
         console.log("Unhandled event");
@@ -127,9 +135,11 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
     	if (this.event.context.System.device.supportedInterfaces.Display) {
 	    this.response.speak(welcomeMessage).listen(repeatWelcomeMessage).renderTemplate(template);
-            this.emit(':responseReady');
+            this.attributes['EchoShow'] = true;
   	    console.log("this was requested by an Echo Show");
+            this.emit(':responseReady');
     	} else {
+            this.attributes['EchoShow'] = false;
     	    this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
     	}
     },
