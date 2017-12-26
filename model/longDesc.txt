@@ -1,0 +1,15 @@
+This skill teaches the basics for piano.
+
+Begin by learning the scale. Say something like.
+- Teach me how to play the scale.
+- Play the scale in reverse.
+
+Once you've mastered the basics, move onto playing songs.  Start by saying.
+- List songs.
+
+Then pick one, and request it by saying something like.
+- Teach me how to play Twinkle Twinkle Little Star.
+- What are the notes to Three Blind Mice?
+- How do you play London Bridge is Falling Down?
+
+When a video is playing on an Echo Show, you can use commands to control with your voice beyond just changing the volume.  For example, you can say, Pause and Rewind to repeat a section again
