@@ -1,42 +1,74 @@
 [
 	{
 		"requestName": "silent night",
+		"listSong":true,
 		"videoObject": "SilentNight.mp4",
 		"audioObject": "SilentNight.mp3"
 	},
 	{
 		"requestName": "mary had a little lamb",
+                "listSong":true,
 		"videoObject": "MaryHadLittleLamb.mp4",
 		"audioObject": "MaryHadLittleLamb.mp3"
 	},
 	{
 		"requestName": "star spangled banner",
+                "listSong":true,
 		"videoObject": "StarSpangledBanner.mp4",
 		"audioObject": "StarSpangledBanner.mp3"
 	},
 	{
 		"requestName": "twinkle twinkle little star",
+                "listSong":true,
 		"videoObject": "TwinkleTwinkle.mp4",
 		"audioObject": "TwinkleTwinkle.mp3"
 	},
+        {
+                "requestName": "twinkle twinkle",
+                "listSong":false,
+                "videoObject": "TwinkleTwinkle.mp4",
+                "audioObject": "TwinkleTwinkle.mp3"
+        },
 	{
 		"requestName": "happy birthday",
+                "listSong":true,
 		"videoObject": "HappyBirthday.mp4",
 		"audioObject": "HappyBirthday.mp3"
 	},
 	{
 		"requestName": "ode to joy",
+                "listSong":true,
 		"videoObject": "OdeToJoy.mp4",
 		"audioObject": "OdeToJoy.mp3"
 	},
 	{
 		"requestName": "london bridges",
+                "listSong":true,
 		"videoObject": "LondonBridge.mp4",
 		"audioObject": "LondonBridge.mp3"
 	},
+        {
+                "requestName": "london bridges falling down",
+                "listSong":false,
+                "videoObject": "LondonBridge.mp4",
+                "audioObject": "LondonBridge.mp3"
+        },
+        {
+                "requestName": "london bridge is falling down",
+                "listSong":false,
+                "videoObject": "LondonBridge.mp4",
+                "audioObject": "LondonBridge.mp3"
+        },
 	{
-		"requestName": "three blind mice",
+		"requestName": "3 blind mice",
+                "listSong":true,
 		"videoObject": "ThreeBlindMice.mp4",
 		"audioObject": "ThreeBlindMice.mp3"
-	}
+	},
+        {
+                "requestName": "three blind mice",
+                "listSong":false,
+                "videoObject": "ThreeBlindMice.mp4",
+                "audioObject": "ThreeBlindMice.mp3"
+        }
 ]

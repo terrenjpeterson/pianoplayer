@@ -20,7 +20,7 @@ var states = {
 
 // This is the intial welcome message
 const welcomeMessage = "Welcome to the piano teacher skill, your personal instructor. " +
-    "Ask me to teach you a song to begin, or say, List Songs, for which I know.";
+    "Ask me to teach you a song to begin, or say, List Songs, and I will list what is available.";
 
 // This is the message that is repeated if the response to the initial welcome message is not heard
 const repeatWelcomeMessage = "You are currently using the piano teacher skill. This skill is designed " +
@@ -43,6 +43,10 @@ const noSongRepeatMessage = "Would you like me to teach you a song? If so, pleas
 
 // This is the goodbye message when the user has asked to quit the game
 const goodbyeMessage = "Ok, see you next time!";
+
+// Tis is the unhandled message when the skill is invoked, but unclear of 
+const unhandledMessage = "I'm sorry, I didn't understand your request. Would you like me to " +
+   "teach you a song? If so, please say something like, List Songs, to get started.";
 
 // This is the initial background image played at the launch of the skill
 const musicBackground = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
@@ -250,9 +254,11 @@ var newSessionHandler = {
 	    "to play the notes on a piano.";
 
 	console.log("Build song list");
-	// get all of the song names from the array
+	// get all of the valid song names from the array
         for (i = 0; i < songs.length; i++ ) {
-	    message = message + songs[i].requestName + ", "
+	    if (songs[i].listSong) {
+	        message = message + songs[i].requestName + ", "
+	    }
 	}
 	message = message + "Just say something like, Teach me how to play " +
 	    songs[0].requestName + ".";
@@ -262,7 +268,6 @@ var newSessionHandler = {
     'Unhandled': function () {
         console.log("Unhandled event");
         console.log(JSON.stringify(this.event));
-        const unhandledMessage = "Something didn't work on this.";
         this.emit(':ask', unhandledMessage, unhandledMessage);
     }
 };
@@ -271,7 +276,7 @@ var newSessionHandler = {
 
 // Called at the start of the game, picks and asks first question for the user
 var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
-    'Welcome': function () {
+    'LaunchRequest': function () {
     	console.log("Launch Request");
     	// Display.RenderTemplate directives can be added to the response
     	const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
@@ -434,17 +439,18 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	console.log("Build song list");
 	// get all of the song names from the array
         for (i = 0; i < songs.length; i++ ) {
-	    message = message + songs[i].requestName + ", "
-	}
+            if (songs[i].listSong) {
+                message = message + songs[i].requestName + ", "
+            }
+        }
 	message = message + "Just say something like, Teach me how to play " +
 	    songs[0].requestName + ".";
 
 	this.emit(':ask', message, repromptMessage);
     },
     'Unhandled': function () {
-	console.log("Unhandled event");
+    	console.log("Unhandled event");
         console.log(JSON.stringify(this.event));
-	const unhandledMessage = "Something didn't work on this.";
         this.emit(':ask', unhandledMessage, unhandledMessage);
     }
 });
