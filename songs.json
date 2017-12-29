@@ -1,73 +1,93 @@
 [
 	{
-		"requestName": "silent night",
+		"requestName": "Silent Night",
 		"listSong":true,
+		"token":"song001",
+		"difficulty":"Moderate",
 		"videoObject": "SilentNight.mp4",
 		"audioObject": "SilentNight.mp3"
 	},
 	{
-		"requestName": "mary had a little lamb",
+		"requestName": "Mary Had a Little Lamb",
                 "listSong":true,
+                "token":"song002",
+                "difficulty":"Easy",
 		"videoObject": "MaryHadLittleLamb.mp4",
 		"audioObject": "MaryHadLittleLamb.mp3"
 	},
 	{
-		"requestName": "star spangled banner",
+		"requestName": "Star Spangled Banner",
                 "listSong":true,
+                "token":"song003",
+                "difficulty":"Moderate",
 		"videoObject": "StarSpangledBanner.mp4",
 		"audioObject": "StarSpangledBanner.mp3"
 	},
 	{
-		"requestName": "twinkle twinkle little star",
+		"requestName": "Twinkle Twinkle Little Star",
                 "listSong":true,
+                "token":"song004",
+                "difficulty":"Easy",
 		"videoObject": "TwinkleTwinkle.mp4",
 		"audioObject": "TwinkleTwinkle.mp3"
 	},
         {
-                "requestName": "twinkle twinkle",
+                "requestName": "Twinkle Twinkle",
                 "listSong":false,
+                "difficulty":"Easy",
                 "videoObject": "TwinkleTwinkle.mp4",
                 "audioObject": "TwinkleTwinkle.mp3"
         },
 	{
-		"requestName": "happy birthday",
+		"requestName": "Happy Birthday",
                 "listSong":true,
+                "token":"song005",
+                "difficulty":"Easy",
 		"videoObject": "HappyBirthday.mp4",
 		"audioObject": "HappyBirthday.mp3"
 	},
 	{
-		"requestName": "ode to joy",
+		"requestName": "Ode to Joy",
                 "listSong":true,
+                "token":"song006",
+                "difficulty":"Easy",
 		"videoObject": "OdeToJoy.mp4",
 		"audioObject": "OdeToJoy.mp3"
 	},
 	{
-		"requestName": "london bridges",
+		"requestName": "London Bridges",
                 "listSong":true,
+                "token":"song007",
+                "difficulty":"Easy",
 		"videoObject": "LondonBridge.mp4",
 		"audioObject": "LondonBridge.mp3"
 	},
         {
-                "requestName": "london bridges falling down",
+                "requestName": "London Bridges Falling Down",
                 "listSong":false,
+                "difficulty":"Easy",
                 "videoObject": "LondonBridge.mp4",
                 "audioObject": "LondonBridge.mp3"
         },
         {
-                "requestName": "london bridge is falling down",
+                "requestName": "London Bridge is Falling Down",
                 "listSong":false,
+                "difficulty":"Easy",
                 "videoObject": "LondonBridge.mp4",
                 "audioObject": "LondonBridge.mp3"
         },
 	{
-		"requestName": "3 blind mice",
+		"requestName": "3 Blind Mice",
                 "listSong":true,
+                "token":"song008",
+                "difficulty":"Easy",
 		"videoObject": "ThreeBlindMice.mp4",
 		"audioObject": "ThreeBlindMice.mp3"
 	},
         {
-                "requestName": "three blind mice",
+                "requestName": "Three Blind Mice",
                 "listSong":false,
+                "difficulty":"Easy",
                 "videoObject": "ThreeBlindMice.mp4",
                 "audioObject": "ThreeBlindMice.mp3"
         }

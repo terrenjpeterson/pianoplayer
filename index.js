@@ -312,6 +312,25 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	console.log("Playing Welcome Function");
 	this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
     },
+    // this is invoked by a touch on the Echo Show screen from a list item
+    'ElementSelected': function() {
+        console.log("Element Selected:" + this.event.request.token);
+	var videoName = "";
+	// match token to song name and find the video object to play
+	for (i = 0; i < songs.length; i++ ) {
+	    if (songs[i].token === this.event.request.token) {
+		console.log("Play " + songs[i].requestName);
+		videoName = songs[i].videoObject;
+	    }
+	}
+        const videoClip = videoLoc + videoName;
+        //const metadata = {
+        //    'title': 'Basic Note Drill'
+        //    };
+        this.response.playVideo(videoClip);
+	this.emit(':responseReady');
+        //this.emit(':ask', 'select', 'select');
+    },
     // this plays the basic scale
     'BasicScale': function() {
 	console.log("Play the basic C Major scale.");
@@ -436,6 +455,36 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	    songs[0].requestName + ", and I will given instructions on how " +
 	    "to play the notes on a piano.";
 
+	if (true) {
+        //if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+	    console.log("being played by a supported video device.");
+	    //const itemImage = makeImage('https://url/to/imageResource', imageWidth, imageHeight);
+    	    const listItemBuilder = new Alexa.templateBuilders.ListItemBuilder();
+            const listTemplateBuilder = new Alexa.templateBuilders.ListTemplate1Builder();
+	    // build list of all available songs
+            for (i = 0; i < songs.length; i++ ) {
+                if (songs[i].listSong) {
+		    // pull attributes from song array and apply to the list
+		    listItemBuilder.addItem(null, songs[i].token, makePlainText(songs[i].requestName), 
+			makePlainText(songs[i].difficulty));
+                    message = message + songs[i].requestName + ", "
+                }
+            }
+    	    //listItemBuilder.addItem(itemImage, 'listItemToken4', makePlainText('List Item 4'));
+    	    const listItems = listItemBuilder.build();
+	    const imageLoc  = musicBackground;
+    	    const listTemplate = listTemplateBuilder.setToken('listToken')
+    										.setTitle('Available Song List')
+    										.setListItems(listItems)
+										.setBackgroundImage(makeImage(imageLoc))
+    										.build();
+	    console.log(JSON.stringify(listTemplate));
+    	    this.response.speak(message).renderTemplate(listTemplate);
+    	    this.emit(':responseReady');
+	} else {
+	    console.log("being played by a non-video device.");
+        }
+
 	console.log("Build song list");
 	// get all of the song names from the array
         for (i = 0; i < songs.length; i++ ) {
@@ -446,7 +495,7 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	message = message + "Just say something like, Teach me how to play " +
 	    songs[0].requestName + ".";
 
-	this.emit(':ask', message, repromptMessage);
+	//this.emit(':ask', message, repromptMessage);
     },
     'Unhandled': function () {
     	console.log("Unhandled event");
