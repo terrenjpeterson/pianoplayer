@@ -107,7 +107,8 @@ this.response.speak(message).listen(noSongRepeatMessage).renderTemplate(listTemp
 this.emit(':responseReady');
 ```
 
-For reference, here is what the 
+For reference, here is what the list object ends up looking like.
+The list does not currently have an image, but it does have both primary and secondary text.
 
 ```sh
 {
@@ -155,10 +156,35 @@ For reference, here is what the
 }
 ```
 
+Each item in the list also is identified with a unique token.
+This token is passed back to the skill if one of the songs of the list is selected by the touch screen on the Echo Show.
+
 ## Data in Song List
+
+All of the current songs that this skill can play are stored in the (songs.json)[https://github.com/terrenjpeterson/pianoplayer/blob/master/songs.json] file.
+This file is read into a local array, then referenced within various functions of the skill.
+There is a boolean named listSong that determines if the song name should be read during a listing of the skills.
+This is because there are duplicate entries in the array for multiple names that may be uttered by the user when trying to request a song.
 
 ## Event Triggered by Touching Echo
 
+When a list template is used, the screen on the device has the ability to invoke the skill based on a touch event.
+This is the 'ElementSelected' event. The event passes in the token from the list under the attribute this.event.request.token.
+The function then matches the token value with the array of songs, and plays the video for the user.
+There is no audio equivalent to this feature as there is nothing to 'touch' on a standard Alexa device.
+
 ## How to Create Videos with Camtasia
 
+Much of the effort in building this skill was around creating the content
+
 ## Lambda Deployment Process
+
+When developing this skill, I've used an IDE and a local copy of the GitHub repo.
+When I'm ready to test out the skill, I execute the (build.sh)[https://github.com/terrenjpeterson/pianoplayer/blob/master/build.sh] script.
+This script has multiple steps.
+
+1. Create a local build package by zipping up the source code, songs.json file, and npm binaries.
+2. Stage the zipped file into a s3 bucket.
+3. Update the function code for the appropriate (Green/Blue) version of the skill. Which one depends on if I am updating the local test version or the one currently in production.
+4. Test the lambda function by invoking using locally managed test data.
+
