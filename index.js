@@ -48,8 +48,9 @@ const goodbyeMessage = "Ok, see you next time!";
 const unhandledMessage = "I'm sorry, I didn't understand your request. Would you like me to " +
    "teach you a song? If so, please say something like, List Songs, to get started.";
 
-// This is the initial background image played at the launch of the skill
+// These are the backgrounds used to display on the screen including the initial launch
 const musicBackground = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoKeyboard.jpg';
+const pianoStrings = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoStrings.jpg';
 
 // These are the folders where the mp3 & mp4 files are located
 const audioLoc = 'https://s3.amazonaws.com/pianoplayerskill/audio/';
@@ -242,7 +243,7 @@ var newSessionHandler = {
     },
     // this is the function that returns all the available songs to be played
     'ListSongs': function() {
-	console.log("List available songs.");
+	console.log("List available songs - unused version?");
 	
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
@@ -329,7 +330,6 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
         //    };
         this.response.playVideo(videoClip);
 	this.emit(':responseReady');
-        //this.emit(':ask', 'select', 'select');
     },
     // this plays the basic scale
     'BasicScale': function() {
@@ -455,10 +455,11 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	    songs[0].requestName + ", and I will given instructions on how " +
 	    "to play the notes on a piano.";
 
-	if (true) {
-        //if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+	// check if video enabled device - if so, build visual list
+        if (this.event.context.System.device.supportedInterfaces.VideoApp) {
 	    console.log("being played by a supported video device.");
 	    //const itemImage = makeImage('https://url/to/imageResource', imageWidth, imageHeight);
+	    const itemImage = null;
     	    const listItemBuilder = new Alexa.templateBuilders.ListItemBuilder();
             const listTemplateBuilder = new Alexa.templateBuilders.ListTemplate1Builder();
 	    // build list of all available songs
@@ -470,32 +471,33 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
                     message = message + songs[i].requestName + ", "
                 }
             }
-    	    //listItemBuilder.addItem(itemImage, 'listItemToken4', makePlainText('List Item 4'));
+	    message = message + "Just select on the screen a song, or request by saying something " +
+		"like, Teach me how to play " + songs[0].requestName + ".";
+
     	    const listItems = listItemBuilder.build();
-	    const imageLoc  = musicBackground;
+	    const imageLoc  = pianoStrings;
     	    const listTemplate = listTemplateBuilder.setToken('listToken')
     										.setTitle('Available Song List')
     										.setListItems(listItems)
 										.setBackgroundImage(makeImage(imageLoc))
     										.build();
 	    console.log(JSON.stringify(listTemplate));
-    	    this.response.speak(message).renderTemplate(listTemplate);
+    	    this.response.speak(message).listen(noSongRepeatMessage).renderTemplate(listTemplate);
     	    this.emit(':responseReady');
 	} else {
-	    console.log("being played by a non-video device.");
-        }
-
-	console.log("Build song list");
-	// get all of the song names from the array
-        for (i = 0; i < songs.length; i++ ) {
-            if (songs[i].listSong) {
-                message = message + songs[i].requestName + ", "
+	    // song list requested by something other than an Echo Show - so just build audio response
+	    console.log("Build song list for non-video device");
+	    // get all of the song names from the array
+            for (i = 0; i < songs.length; i++ ) {
+            	if (songs[i].listSong) {
+                    message = message + songs[i].requestName + ", "
+            	}
             }
-        }
-	message = message + "Just say something like, Teach me how to play " +
-	    songs[0].requestName + ".";
+	    message = message + "Just say something like, Teach me how to play " +
+	    	songs[0].requestName + ".";
 
-	//this.emit(':ask', message, repromptMessage);
+	    this.emit(':ask', message, repromptMessage);
+        }
     },
     'Unhandled': function () {
     	console.log("Unhandled event");
