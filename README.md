@@ -166,6 +166,28 @@ This file is read into a local array, then referenced within various functions o
 There is a boolean named listSong that determines if the song name should be read during a listing of the skills.
 This is because there are duplicate entries in the array for multiple names that may be uttered by the user when trying to request a song.
 
+Here is a sample of the data
+```sh
+[
+	{
+		"requestName": "Silent Night",
+		"listSong":true,
+		"token":"song001",
+		"difficulty":"Moderate",
+		"videoObject": "SilentNight.mp4",
+		"audioObject": "SilentNight.mp3"
+	},
+	{
+		"requestName": "Mary Had a Little Lamb",
+                "listSong":true,
+                "token":"song002",
+                "difficulty":"Easy",
+		"videoObject": "MaryHadLittleLamb.mp4",
+		"audioObject": "MaryHadLittleLamb.mp3"
+	},
+	...
+```
+
 ## Event Triggered by Touching Echo
 
 When a list template is used, the screen on the device has the ability to invoke the skill based on a touch event.
@@ -175,7 +197,18 @@ There is no audio equivalent to this feature as there is nothing to 'touch' on a
 
 ## How to Create Videos with Camtasia
 
-Much of the effort in building this skill was around creating the content
+Much of the effort in building this skill was around creating the content for each song.
+We recorded the piano music we played using a mobile phone, as well as took pictures of the keys and other parts of the piano for use as backgrounds.
+Within Camtasia, there is a process of building layers of different items of media, then assembling.
+Here is a screenshot of Camtasia that highlights this.
+
+![](https://s3.amazonaws.com/pianoplayerskill/logos/camtasia.png)
+
+In making the videos, the base layer is a photograph. By bringing in the audio from playing the piano, we get a timeline that shows each note being played in the mp3 file.
+By the curve within the wave, we can tell when each note on the piano is struck, so we add another layer that highlights which note is being played.
+If there are multiple notes being played at once, then there are multiple images.
+When complete, Camtasia builds an mp4 file that is in a compatible format for playing on an Echo Show.
+We also create an mp3 file that can be used for non-video devices that use the skill.
 
 ## Lambda Deployment Process
 
