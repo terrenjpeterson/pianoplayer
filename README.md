@@ -161,7 +161,7 @@ This token is passed back to the skill if one of the songs of the list is select
 
 ## Data in Song List
 
-All of the current songs that this skill can play are stored in the (songs.json)[https://github.com/terrenjpeterson/pianoplayer/blob/master/songs.json] file.
+All of the current songs that this skill can play are stored in the [songs.json](https://github.com/terrenjpeterson/pianoplayer/blob/master/songs.json) file.
 This file is read into a local array, then referenced within various functions of the skill.
 There is a boolean named listSong that determines if the song name should be read during a listing of the skills.
 This is because there are duplicate entries in the array for multiple names that may be uttered by the user when trying to request a song.
@@ -180,7 +180,7 @@ Much of the effort in building this skill was around creating the content
 ## Lambda Deployment Process
 
 When developing this skill, I've used an IDE and a local copy of the GitHub repo.
-When I'm ready to test out the skill, I execute the (build.sh)[https://github.com/terrenjpeterson/pianoplayer/blob/master/build.sh] script.
+When I'm ready to test out the skill, I execute the [build.sh](https://github.com/terrenjpeterson/pianoplayer/blob/master/build.sh) script.
 This script has multiple steps.
 
 1. Create a local build package by zipping up the source code, songs.json file, and npm binaries.
