@@ -55,6 +55,7 @@ const pianoStrings = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoStrin
 // These are the folders where the mp3 & mp4 files are located
 const audioLoc = 'https://s3.amazonaws.com/pianoplayerskill/audio/';
 const videoLoc = 'https://s3.amazonaws.com/pianoplayerskill/media/';
+const musicNoteFolder = "\"https://s3.amazonaws.com/pianoplayerskill/musicNotes/";
 
 // --------------- Handlers -----------------------
 
@@ -499,9 +500,124 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	    this.emit(':ask', message, repromptMessage);
         }
     },
+    'SessionEndedRequest': function() {
+	console.log("Session ended");
+	this.emit(':tell', goodbyeMessage);
+    },
+    // this starts a new note game
+    'PlayNoteGame': function() {
+	console.log("Play Note Game Requested.");
+
+	// generate random note
+	const noteGuess = generateRandomNote().noteGuess;
+
+	var noteGameMessage = "This is a note game. I will play a note on the musical " +
+	    "scale, then you can guess which one it is. Please answer in the form of a " +
+	    "sentance so I can hear you correct. For example, say That is a D." +
+	    "<break time=\"1s\"/>" +
+	    "<say-as interpret-as=\"interjection\">good luck!</say-as>" +
+	    "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />";
+	var noteGameReminder = "Here is the note once again." +
+            "<break time=\"1s\"/>" +
+            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+	    "Please guess when ready.";
+
+	// save the note to be guessed, and set the string of correct answers to zero.
+	this.attributes['GuessNote'] = noteGuess;
+	this.attributes['NumberCorrect'] = 0;
+
+	this.emit(':ask', noteGameMessage, noteGameReminder);
+    },
+    'MusicGuess': function() {
+	console.log("Game Guessed");
+	const slots    = this.event.request.intent.slots;
+	const session  = this.event.session.attributes;
+	var numCorrect = session.NumberCorrect;
+
+	// verify that a note has been generated
+	if (!session.GuessNote) {
+	    console.log("Game not in session.")
+	}
+
+	// sometimes Alexa appends a period after the letter - remove if that is the case.
+        var note = slots.MusicNotes.value;
+    	if (note[1]==".") {
+            note = note[0];
+    	}
+
+	var accidental = "";
+	if (slots.MusicAccidental) {
+	    accidental = slots.MusicAccidental.value; 	
+	}
+
+	// replay the original note, then determine if answer was correct
+	var musicGuessMessage = "Here was the note I played" +
+	    "<audio src=" + musicNoteFolder + session.GuessNote + ".mp3\" />" +
+	    "You guessed "; 
+	if (note) {
+	    musicGuessMessage = musicGuessMessage + note + ". ";
+            if (session.GuessNote.toLowerCase() === note.toLowerCase()) {
+		console.log("User Guessed Correct: " + note);
+		numCorrect += 1;
+		musicGuessMessage = musicGuessMessage + "You are correct! " +
+		    "That makes " + numCorrect + " in a row. " +
+            	    "<say-as interpret-as=\"interjection\">way to go!</say-as>";
+		this.attributes['NumberCorrect'] = numCorrect;
+	    } else {
+		console.log("User Guessed Incorrect: " + note + " Correct Answer: " + 
+		    session.GuessNote);
+		musicGuessMessage = musicGuessMessage +
+            	    "<say-as interpret-as=\"interjection\">aw man</say-as>" + 
+		    "Sorry, the correct answer is " +
+		    session.GuessNote.toLowerCase() + ". ";
+		this.attributes['NumberCorrect'] = 0;
+	    }
+	}
+
+        // generate the next question and save for the next round
+        const noteGuess = generateRandomNote().noteGuess;
+        this.attributes['GuessNote'] = noteGuess;
+
+	musicGuessMessage = musicGuessMessage + "Let's try another round. " +
+	    "Here is the next note." +
+            "<break time=\"1s\"/>" +
+            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />";
+	var musicReminderMessage = "Here is the next note to guess. " +
+            "<break time=\"1s\"/>" +
+            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />";
+
+	this.emit(':ask', musicGuessMessage, musicReminderMessage);
+    },
     'Unhandled': function () {
     	console.log("Unhandled event");
         console.log(JSON.stringify(this.event));
         this.emit(':ask', unhandledMessage, unhandledMessage);
     }
 });
+
+// this function generates a random musical note
+function generateRandomNote() {
+    var noteGuess = "";
+
+    const note = Math.floor(Math.random() * 7);
+
+    if (note > 6) {
+        noteGuess = "g";
+    } else if (note > 5) {
+        noteGuess = "f";
+    } else if (note > 4) {
+        noteGuess = "e";
+    } else if (note > 3) {
+        noteGuess = "d";
+    } else if (note > 2) {
+        noteGuess = "c";
+    } else if (note > 1) {
+        noteGuess = "b";
+    } else {
+        noteGuess = "a";
+    }
+
+    return {
+	noteGuess
+    };
+}
