@@ -23,29 +23,36 @@ var states = {
 
 // This is the intial welcome message
 const welcomeMessage = "Welcome to the piano teacher skill, your personal instructor. " +
-    "Ask me to teach you a song to begin, or say, List Songs, and I will list what is available.";
+    "To get started, say 'List Lessons', 'List Songs', or 'Play musical note guessing game'.";
 
 // This is the message that is repeated if the response to the initial welcome message is not heard
 const repeatWelcomeMessage = "You are currently using the piano teacher skill. This skill is designed " +
     "to teach beginner lessons on the piano. Say something like, Teach me how to play " +
-    "Mary Had a Little Lamb, to get started.";
+    "Mary Had a Little Lamb, to get started, or ask for help.";
 
 // this is the message that is repeated if Alexa does not hear/understand the reponse to the welcome message
-const promptToStartMessage = "Say something like, List Songs, to get started.";
+const promptToStartMessage = "Say something like, List Songs or List Lessons, to get started.";
 
 // this is the help message during the setup at the beginning of the game
 const helpMessage = "This skill has the ability to provide beginner lessons for the piano. " +
-    "To begin, say, Teach me how to play the scale, and I will go through the individual " +
-    "notes on a scale. " +
+    "To begin, say, List Lessons, and I will go through some helpful lessons to get started. " +
+    "One of those lessons is to teach how to play the scale. Just say 'Play the Scale', and " +
+    "I will go through the individual notes on a scale. " +
     "As you are beginning to learn musical notes, see how well you can recognize them " +
     "by saying 'Play musical note guessing game' and see how many notes in a row you can recognize. " +
-    "There are also many different songs that I can teach. Say, List Songs " +
+    "There are also many different songs that I can teach. Say, 'List Songs' " +
     "for a complete list, then ask me to teach you one, and I will provide the notes to go along.";
 
 // these are messages when a song requested was invalid
 const noSongMessage = "Sorry, I didn't hear a song name. Which song do you want to learn?";
 const noSongRepeatMessage = "Would you like me to teach you a song? If so, please provide me " +
     "the song name. For example, say something like, Teach me how to play Twinkle Twinkle Little Star.";
+
+// these are messages when a guess is made for a game, but no game is in progress
+const noGameMessage = "Sorry, no game is currently in-progress. If you would like to begin the music " +
+    "note game, just say, 'Play musical note guessing game.'";
+const noGameReminderMessage = "Are you interested in playing the music guessing game? If so, " +
+    "just say, 'Play musical note guessing game' and I will play the first note.";
 
 // this is the message after the chord lesson is taught
 const repromptChordMessage = "Would you like to learn another lesson? If so, " +
@@ -596,7 +603,7 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
     'PlayNoteGame': function() {
 	console.log("Play Note Game Requested.");
 
-	// generate random note
+	// generate random note and provide to student
 	const noteGuess = generateRandomNote().noteGuess;
 
 	var noteGameMessage = "This is a note game. I will play a note on the musical " +
@@ -604,11 +611,17 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	    "sentance so I can hear you correct. For example, say That is a D." +
 	    "<break time=\"1s\"/>" +
 	    "<say-as interpret-as=\"interjection\">good luck!</say-as>" +
-	    "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />";
+	    "<break time=\"1s\"/>" +
+	    "Here is the first note." +
+	    "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+	    "<break time=\"1s\"/>" +
+	    "Now go ahead and guess what it is, and say it in the form of a statement. " +
+	    "For example, say 'That is a D.'";
 	var noteGameReminder = "Here is the note once again." +
             "<break time=\"1s\"/>" +
             "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
-	    "Please guess when ready.";
+	    "Please guess when ready, and make sure to do it in the form of a statement. " +
+	    "For example, say 'That is a D.'";
 
 	// save the note to be guessed, and set the string of correct answers to zero.
 	this.attributes['GuessNote'] = noteGuess;
@@ -623,58 +636,73 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 	var numCorrect = session.NumberCorrect;
 
 	// verify that a note has been generated
-	if (!session.GuessNote) {
-	    console.log("Game not in session.")
-	}
+	if (session.GuessNote) {
+	    // sometimes Alexa appends a period after the letter - remove if that is the case.
+            var note = slots.MusicNotes.value;
+    	    if (note[1]==".") {
+		console.log("Removed extra period");
+                note = note[0];
+    	    }
 
-	// sometimes Alexa appends a period after the letter - remove if that is the case.
-        var note = slots.MusicNotes.value;
-    	if (note[1]==".") {
-            note = note[0];
-    	}
+	    // these aren't yet part of the game - so should be removed from any guesses
+	    var accidental = "";
+	    if (slots.MusicAccidental) {
+	        accidental = slots.MusicAccidental.value; 	
+	    }
 
-	var accidental = "";
-	if (slots.MusicAccidental) {
-	    accidental = slots.MusicAccidental.value; 	
-	}
-
-	// replay the original note, then determine if answer was correct
-	var musicGuessMessage = "Here was the note I played" +
-	    "<audio src=" + musicNoteFolder + session.GuessNote + ".mp3\" />" +
-	    "You guessed "; 
-	if (note) {
-	    musicGuessMessage = musicGuessMessage + note + ". ";
-            if (session.GuessNote.toLowerCase() === note.toLowerCase()) {
-		console.log("User Guessed Correct: " + note);
-		numCorrect += 1;
-		musicGuessMessage = musicGuessMessage + "You are correct! " +
-		    "That makes " + numCorrect + " in a row. " +
-            	    "<say-as interpret-as=\"interjection\">way to go!</say-as>";
-		this.attributes['NumberCorrect'] = numCorrect;
+	    // replay the original note, then determine if answer was correct
+	    var musicGuessMessage = "Here was the note I played" +
+	    	"<audio src=" + musicNoteFolder + session.GuessNote + ".mp3\" />";
+	    if (note) {
+	    	musicGuessMessage = musicGuessMessage + "You guessed " + note + ". ";
+            	if (session.GuessNote.toLowerCase() === note.toLowerCase()) {
+		    console.log("User Guessed Correct: " + note);
+		    numCorrect += 1;
+		    musicGuessMessage = musicGuessMessage + "You are correct! ";
+		    // only add this if a streak of more than one right answer is in-progress
+		    if (numCorrect > 1) {
+		    	musicGuessMessage = musicGuessMessage + "That makes " + numCorrect + " in a row. " +
+            	    	"<say-as interpret-as=\"interjection\">way to go!</say-as>" +
+			"<break time=\"1s\"/>";
+		    }
+		    this.attributes['NumberCorrect'] = numCorrect;
+	        } else {
+		    console.log("User Guessed Incorrect: " + note + " Correct Answer: " + 
+		        session.GuessNote);
+		    musicGuessMessage = musicGuessMessage +
+            	    	"<say-as interpret-as=\"interjection\">aw man</say-as>" + "<break time=\"0.5s\"/>" +
+		    	"Sorry, the correct answer is " + session.GuessNote + "." + "<break time=\"1s\"/>";
+		    this.attributes['NumberCorrect'] = 0;
+	        }
 	    } else {
-		console.log("User Guessed Incorrect: " + note + " Correct Answer: " + 
-		    session.GuessNote);
-		musicGuessMessage = musicGuessMessage +
-            	    "<say-as interpret-as=\"interjection\">aw man</say-as>" + 
-		    "Sorry, the correct answer is " +
-		    session.GuessNote.toLowerCase() + ". ";
+		console.log("No note provided in the answer.");
+		musicGuessMessage = musicGuessMessage + "You didn't provide a guess. " +
+		    "The correct answer was " + session.GuessNote + ". ";
 		this.attributes['NumberCorrect'] = 0;
 	    }
+
+            // generate the next question and save for the next round
+            const noteGuess = generateRandomNote().noteGuess;
+            this.attributes['GuessNote'] = noteGuess;
+
+	    musicGuessMessage = musicGuessMessage + "Let's try another round. " +
+	    	"Here is the next note." + 
+		"<break time=\"1s\"/>" +
+            	"<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+		"<break time=\"1s\"/>" +
+		"What note do you think it is? For example, say 'That is an F.'";
+	    var musicReminderMessage = "Here is the next note to guess. " +
+            	"<break time=\"1s\"/>" +
+            	"<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+                "<break time=\"1s\"/>" +
+		"Remember, form your guess as a statement. For example, say 'That is an F.'";
+
+	    this.emit(':ask', musicGuessMessage, musicReminderMessage);
+
+        } else {
+	    // game is not inn session - provide error message
+	    this.emit(':ask', noGameMessage, noGameReminderMessage);
 	}
-
-        // generate the next question and save for the next round
-        const noteGuess = generateRandomNote().noteGuess;
-        this.attributes['GuessNote'] = noteGuess;
-
-	musicGuessMessage = musicGuessMessage + "Let's try another round. " +
-	    "Here is the next note." +
-            "<break time=\"1s\"/>" +
-            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />";
-	var musicReminderMessage = "Here is the next note to guess. " +
-            "<break time=\"1s\"/>" +
-            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />";
-
-	this.emit(':ask', musicGuessMessage, musicReminderMessage);
     },
     'Unhandled': function () {
     	console.log("Unhandled event");
