@@ -83,14 +83,14 @@ exports.handler = function (event, context, callback) {
     var alexa = Alexa.handler(event, context);
     alexa.appId = 'amzn1.ask.skill.1de392e9-962b-4a51-9e53-e7001299efa3';
     alexa.dynamoDBTableName = 'PianoEchoShow';
-    alexa.registerHandlers(newSessionHandler, startLessonHandlers);
+    alexa.registerHandlers(newSessionHandler, startLessonHandlers, commonHandlers);
     alexa.execute();
 };
 
 // set state to start up
 var newSessionHandler = {
     'Welcome': function () {
-        console.log("Launch Request");
+        console.log("Launch Request from Welcome Request");
 	// move next utterance to use start mode
 	this.handler.state = states.STARTMODE;
         // Display.RenderTemplate directives can be added to the response
@@ -112,7 +112,7 @@ var newSessionHandler = {
         }
     },
     'LaunchRequest': function () {
-        console.log("Launch Request");
+        console.log("Native Launch Request");
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
         // Display.RenderTemplate directives can be added to the response
@@ -140,192 +140,56 @@ var newSessionHandler = {
     },
     // this plays the basic scale
     'BasicScale': function() {
-	console.log("Play the basic C Major scale.");
-
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
-
-	// If the device is able to play video pass video, else audio
-        if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-	    const videoClip = videoLoc + 'BasicScale.mp4';
-	    const metadata = {
-		'title': 'Basic Note Drill'
-	    };
-	    this.response.playVideo(videoClip, metadata);
-            console.log("Invoked from video playing device");
-        } else {
-            const audioMessage = 'Okay, get ready to play the scale starting with the ' +
-		'middle C, then go up a white key until you hit the high C.' +
-                '<break time="3s"/>' +
-                '<audio src=\"' + audioLoc + 'PianoScale.mp3\" />' +
-                '<break time="3s"/>' +
-                'Would you like to play again? If so, say, Play the scale. ' +
-		'If you would like to play in reverse, say, Play scale in reverse.';
-	    const repeatMessage = 'If you want to try again, say, Play the scale. ' +
-		'To play in reverse, say, Play scale in reverse.';
-
-            this.response.speak(audioMessage).listen(repeatMessage);
-            console.log("Playing from non-video device");
-        }
-	this.emit(':responseReady');
+	this.emit('PlayScale');
     },
     // this plays the basic scale in reverse
     'ReverseScale': function() {
-        console.log("Play the basic C Major scale in reverse.");
-
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
-
-	// If the device is able to play video pass video, else audio
-        if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-            const videoClip = videoLoc + 'DownScale.mp4';
-            const metadata = {
-                'title': 'Reverse Note Drill'
-            };
-            this.response.playVideo(videoClip, metadata);
-            console.log("Invoked from video playing device");
-        } else {
-            const audioMessage = 'Okay, get ready to play the scale in reverse starting with the ' +
-                'high C, then go up a white key until you hit the middle C.' +
-                '<break time="3s"/>' +
-                '<audio src=\"' + audioLoc + 'DownScale.mp3\" />' +
-                '<break time="3s"/>' +
-                'Would you like to play again? If so, say, Play the scale in reverse. ' +
-                'If you would are ready to play a song, say, List songs, then select one.';
-            const repeatMessage = 'If you want to try again, say, Play scale in reverse. ' +
-                'To play going back up, please say, Play the scale.';
-
-            this.response.speak(audioMessage).listen(repeatMessage);
-            console.log("Playing from non-video device");
-        }
-
-        this.emit(':responseReady');
+	this.emit('PlayReverseScale');
     },
     // this is the function that is invoked when the user requests a song to be played
     'PlaySong': function() {
-	const slots = this.event.request.intent.slots;
-	var message = "Play Song " + slots.SongName.value + ".";
-
-	console.log("Play Song " + slots.SongName.value + " requested.");
-
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
-
-	var validSong = false;
-	var videoObject = "";
-	var audioObject = "";
-
-	if (slots.SongName.value) {
-	    for (i = 0; i < songs.length; i++ ) {
-	    	if (slots.SongName.value.toLowerCase() === songs[i].requestName.toLowerCase()) {
-		    console.log("User requested valid song.");
-		    validSong = true;
-		    videoObject = songs[i].videoObject;
-		    audioObject = songs[i].audioObject;
-		}
-	    }
-	}
-
-	// check to see if the song is valid
-	if (validSong) {
-	    // send back the video stream for the mp4 file
-	    if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-	    	console.log("returned media stream.");
-	    	const videoClip = videoLoc + videoObject;
-            	const metadata = {
-                    'title': slots.SongName.value
-            	};
-	    	this.response.playVideo(videoClip, metadata);
-	    } else {
-		// else play a non-video version of the response
-		console.log("playing audio version of song " + slots.SongName.value + ".");
-		const audioMessage = 'Okay, get ready to play ' + slots.SongName.value + '.' +
-		    '<break time="3s"/>' +
-		    '<audio src=\"' + audioLoc + audioObject + '\" />' +
-                    '<break time="3s"/>' +
-		    'Would you like to play again? If so, please say, Teach me how to play ' +
-		    slots.SongName.value + ".";
-		this.response.speak(audioMessage);
-		this.response.listen("Would you like to try another song? Just ask for it now.");
-	    }
-	} else if (!slots.SongName.value) {
-	    // error message for no song name provided
-	    console.log("did not provide a song name.");
-	    this.response.speak(noSongMessage).listen(noSongRepeatMessage);
-	} else {
-	    // error message for a song name provided that wasn't valid
-	    console.log("returned invalid song name error message.");
-	    const notFoundMessage = "Sorry, I can't find " + slots.SongName.value + ". If you " +
-		"would like to know the songs I do know, say List Songs.";
-	    this.response.speak(notFoundMessage).listen(noSongRepeatMessage); 
-	}
-	this.emit(':responseReady');
+	this.emit('PlaySongRequest');
+    },
+    // this starts a new note game
+    'PlayNoteGame': function() {
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+        this.emit('BeginNoteGame');
+    },
+    'ElementSelected': function() {
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+        this.emit('ScreenSongSelected');
+    },
+    // this receives a user guess to the note game
+    'MusicGuess': function() {
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+        this.emit('RespondNoteGuess');
     },
     // this is the function that returns all the available songs to be played
     'ListSongs': function() {
-	console.log("List available songs - unused version?");
-	
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
-
-	var message = "Here are the songs currently available. ";
-	var repromptMessage = "Would you like me to teach you a song? " +
-	    "Just say something like, Teach me how to play " + 
-	    songs[0].requestName + ", and I will given instructions on how " +
-	    "to play the notes on a piano.";
-
-	console.log("Build song list");
-	// get all of the valid song names from the array
-        for (i = 0; i < songs.length; i++ ) {
-	    if (songs[i].listSong) {
-	        message = message + songs[i].requestName + ", "
-	    }
-	}
-	message = message + "Just say something like, Teach me how to play " +
-	    songs[0].requestName + ".";
-
-	this.emit(':ask', message, repromptMessage);
+	this.emit('PlaySongList');
     },
     // this is the function that lists off what lessons are available
     'ListLessons': function() {
-	console.log("List available lessons");
-
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
-
-        var message = "Here are the lessons currently available. ";
-        const repromptListLessonMessage = "Would you like me to teach you a lesson? " +
-            "Just say something like, Teach me how to play the scale.";
-
-        console.log("Build lessons list");
-        // get all of the valid lesson names from the array
-        for (i = 0; i < lessons.length; i++ ) {
-            message = message + lessons[i].requestName + ", "
-        }
-        message = message + "Just say something like, Teach me how to play " +
-            " the scale.";
-
-        this.emit(':ask', message, repromptListLessonMessage);
+        this.emit('PlayLessonList');
     },
     // this is the function that describes what a chord is
     'ExplainChords': function() {
-	console.log("Explain what a chord is.");
-	
         // move next utterance to use start mode
         this.handler.state = states.STARTMODE;
-
-	var message = 'A chord is a group of at least three notes that can be played ' +
-	    'together and form the harmony. These are typically played with ' +
-	    'your left hand while your right hand plays the melody. ' +
-	    'An example is the Chord C Major. It is the C, E, and G notes played together ' +
-	    'like this.' +
-            '<break time="1s"/>' +
-            '<audio src=\"' + chordExample + '\" />' +
-            '<break time="1s"/>' +
-	    'These keys are pressed with your pinky, middle finger, and thumb. ' +
-	    'If you would like to learn how to play a song, say List Songs to get started.';
-
-	this.emit(':ask', message, repromptChordMessage);
+	this.emit('PlayChordExplanation');
     },	
     'Unhandled': function () {
         console.log("Unhandled event");
@@ -339,7 +203,7 @@ var newSessionHandler = {
 // Called at the start of the game, picks and asks first question for the user
 var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
     'LaunchRequest': function () {
-    	console.log("Launch Request");
+    	console.log("Launch Request from Start Handler");
     	// Display.RenderTemplate directives can be added to the response
     	const builder = new Alexa.templateBuilders.BodyTemplate1Builder();
     	const imageLoc = musicBackground;
@@ -371,60 +235,87 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
         this.emit(':ask', helpMessage, helpMessage);
     },
     'Welcome': function() {
-	console.log("Playing Welcome Function");
+	console.log("Playing Welcome Function from Start Handler");
 	this.emit(':ask', welcomeMessage, repeatWelcomeMessage);
     },
     // this is invoked by a touch on the Echo Show screen from a list item
     'ElementSelected': function() {
-        console.log("Element Selected:" + this.event.request.token);
-	var videoName = "";
-	// match token to song name and find the video object to play
-	for (i = 0; i < songs.length; i++ ) {
-	    if (songs[i].token === this.event.request.token) {
-		console.log("Play " + songs[i].requestName);
-		videoName = songs[i].videoObject;
-	    }
-	}
-        const videoClip = videoLoc + videoName;
-        //const metadata = {
-        //    'title': 'Basic Note Drill'
-        //    };
-        this.response.playVideo(videoClip);
-	this.emit(':responseReady');
+	this.emit('ScreenSongSelected');
     },
     // this plays the basic scale
     'BasicScale': function() {
-	console.log("Play the basic C Major scale.");
+        this.emit('PlayScale');
+    },
+    // this plays the basic scale in reverse
+    'ReverseScale': function() {
+	this.emit('PlayReverseScale');
+    },
+    // this is the function that is invoked when the user requests a song to be played
+    'PlaySong': function() {
+	this.emit('PlaySongRequest');
+    },
+    // this is the function that returns all the available songs to be played
+    'ListSongs': function() {
+        this.emit('PlaySongList');
+    },
+    // this is the function that lists off what lessons are available
+    'ListLessons': function() {
+	this.emit('PlayLessonList');
+    },
+    // this is the function that describes what a chord is
+    'ExplainChords': function() {
+	this.emit('PlayChordExplanation');
+    },
+    'SessionEndedRequest': function() {
+	console.log("Session ended");
+	this.emit(':tell', goodbyeMessage);
+    },
+    // this starts a new note game
+    'PlayNoteGame': function() {
+	this.emit('BeginNoteGame');
+    },
+    // this receives a user guess to the note game
+    'MusicGuess': function() {
+	this.emit('RespondNoteGuess');
+    },
+    'Unhandled': function () {
+    	console.log("Unhandled event");
+        console.log(JSON.stringify(this.event));
+        this.emit(':ask', unhandledMessage, unhandledMessage);
+    }
+});
 
-	// If the device is able to play video pass video, else audio
+// these are functions not bound to a state, and avoid duplication of code
+var commonHandlers = {
+    'PlayScale': function() {
+        console.log("Play the basic C Major scale.");
+
+        // If the device is able to play video pass video, else audio
         if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-	    const videoClip = videoLoc + 'BasicScale.mp4';
-	    const metadata = {
-		'title': 'Basic Note Drill'
-	    };
-	    this.response.playVideo(videoClip, metadata);
+            const videoClip = videoLoc + 'BasicScale.mp4';
+            const metadata = {
+                'title': 'Basic Note Drill'
+            };
+            this.response.playVideo(videoClip, metadata);
             console.log("Invoked from video playing device");
         } else {
             const audioMessage = 'Okay, get ready to play the scale starting with the ' +
-		'middle C, then go up a white key until you hit the high C.' +
+                'middle C, then go up a white key until you hit the high C.' +
                 '<break time="3s"/>' +
                 '<audio src=\"' + audioLoc + 'PianoScale.mp3\" />' +
                 '<break time="3s"/>' +
                 'Would you like to play again? If so, say, Play the scale. ' +
-		'If you would like to play in reverse, say, Play scale in reverse.';
-	    const repeatMessage = 'If you want to try again, say, Play the scale. ' +
-		'To play in reverse, say, Play scale in reverse.';
+                'If you would like to play in reverse, say, Play scale in reverse.';
+            const repeatMessage = 'If you want to try again, say, Play the scale. ' +
+                'To play in reverse, say, Play scale in reverse.';
 
             this.response.speak(audioMessage).listen(repeatMessage);
             console.log("Playing from non-video device");
         }
-	this.emit(':responseReady');
+        this.emit(':responseReady');
     },
-    // this plays the basic scale in reverse
-    'ReverseScale': function() {
-        console.log("Play the basic C Major scale in reverse.");
-
-	// If the device is able to play video pass video, else audio
+    'PlayReverseScale': function() {
+        // If the device is able to play video pass video, else audio
         if (this.event.context.System.device.supportedInterfaces.VideoApp) {
             const videoClip = videoLoc + 'DownScale.mp4';
             const metadata = {
@@ -449,65 +340,220 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
         this.emit(':responseReady');
     },
-    // this is the function that is invoked when the user requests a song to be played
-    'PlaySong': function() {
-	const slots = this.event.request.intent.slots;
-	var message = "Play Song " + slots.SongName.value + ".";
+    'PlaySongRequest': function() {
+        const slots = this.event.request.intent.slots;
+        var message = "Play Song " + slots.SongName.value + ".";
 
-	console.log("Play Song " + slots.SongName.value + " requested.");
+        console.log("Play Song " + slots.SongName.value + " requested.");
 
-	var validSong = false;
-	var videoObject = "";
-	var audioObject = "";
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
 
-	if (slots.SongName.value) {
-	    for (i = 0; i < songs.length; i++ ) {
-	    	if (slots.SongName.value.toLowerCase() === songs[i].requestName.toLowerCase()) {
-		    console.log("User requested valid song.");
-		    validSong = true;
-		    videoObject = songs[i].videoObject;
-		    audioObject = songs[i].audioObject;
-		}
-	    }
-	}
+        var validSong = false;
+        var videoObject = "";
+        var audioObject = "";
 
-	// check to see if the song is valid
-	if (validSong) {
-	    // send back the video stream for the mp4 file
-	    if (this.event.context.System.device.supportedInterfaces.VideoApp) {
-	    	console.log("returned media stream.");
-	    	const videoClip = videoLoc + videoObject;
-            	const metadata = {
+        if (slots.SongName.value) {
+            for (i = 0; i < songs.length; i++ ) {
+                if (slots.SongName.value.toLowerCase() === songs[i].requestName.toLowerCase()) {
+                    console.log("User requested valid song.");
+                    validSong = true;
+                    videoObject = songs[i].videoObject;
+                    audioObject = songs[i].audioObject;
+                }
+            }
+        }
+
+        // check to see if the song is valid
+        if (validSong) {
+            // send back the video stream for the mp4 file
+            if (this.event.context.System.device.supportedInterfaces.VideoApp) {
+                console.log("returned media stream.");
+                const videoClip = videoLoc + videoObject;
+                const metadata = {
                     'title': slots.SongName.value
-            	};
-	    	this.response.playVideo(videoClip, metadata);
-	    } else {
-		// else play a non-video version of the response
-		console.log("playing audio version of song " + slots.SongName.value + ".");
-		const audioMessage = 'Okay, get ready to play ' + slots.SongName.value + '.' +
-		    '<break time="3s"/>' +
-		    '<audio src=\"' + audioLoc + audioObject + '\" />' +
+                };
+                this.response.playVideo(videoClip, metadata);
+            } else {
+                // else play a non-video version of the response
+                console.log("playing audio version of song " + slots.SongName.value + ".");
+                const audioMessage = 'Okay, get ready to play ' + slots.SongName.value + '.' +
                     '<break time="3s"/>' +
-		    'Would you like to play again? If so, please say, Teach me how to play ' +
-		    slots.SongName.value + ".";
-		this.response.speak(audioMessage);
-		this.response.listen("Would you like to try another song? Just ask for it now.");
-	    }
-	} else if (!slots.SongName.value) {
-	    // error message for no song name provided
-	    console.log("did not provide a song name.");
-	    this.response.speak(noSongMessage).listen(noSongRepeatMessage);
-	} else {
-	    // error message for a song name provided that wasn't valid
-	    console.log("returned invalid song name error message.");
-	    const notFoundMessage = "Sorry, I can't find " + slots.SongName.value + ". If you " +
-		"would like to know the songs I do know, say List Songs.";
-	    this.response.speak(notFoundMessage).listen(noSongRepeatMessage); 
-	}
-	this.emit(':responseReady');
+                    '<audio src=\"' + audioLoc + audioObject + '\" />' +
+                    '<break time="3s"/>' +
+                    'Would you like to play again? If so, please say, Teach me how to play ' +
+                    slots.SongName.value + ".";
+                this.response.speak(audioMessage);
+                this.response.listen("Would you like to try another song? Just ask for it now.");
+            }
+        } else if (!slots.SongName.value) {
+            // error message for no song name provided
+            console.log("did not provide a song name.");
+            this.response.speak(noSongMessage).listen(noSongRepeatMessage);
+        } else {
+            // error message for a song name provided that wasn't valid
+            console.log("returned invalid song name error message.");
+            const notFoundMessage = "Sorry, I can't find " + slots.SongName.value + ". If you " +
+                "would like to know the songs I do know, say List Songs.";
+            this.response.speak(notFoundMessage).listen(noSongRepeatMessage);
+        }
+        this.emit(':responseReady');
     },
-    // this is the function that returns all the available songs to be played
-    'ListSongs': function() {
+    'BeginNoteGame': function() {
+        console.log("Play Note Game Requested.");
+
+        // generate random note and provide to student
+        const noteGuess = generateRandomNote().noteGuess;
+
+        var noteGameMessage = "This is a note game. I will play a note on the musical " +
+            "scale, then you can guess which one it is. Please answer in the form of a " +
+            "sentance so I can hear you correct. For example, say That is a D." +
+            "<break time=\"1s\"/>" +
+            "<say-as interpret-as=\"interjection\">good luck!</say-as>" +
+            "<break time=\"1s\"/>" +
+            "Here is the first note." +
+            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+            "<break time=\"1s\"/>" +
+            "Now go ahead and guess what it is, and say it in the form of a statement. " +
+            "For example, say 'That is a D.'";
+        var noteGameReminder = "Here is the note once again." +
+            "<break time=\"1s\"/>" +
+            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+            "Please guess when ready, and make sure to do it in the form of a statement. " +
+            "For example, say 'That is a D.'";
+
+        // save the note to be guessed, and set the string of correct answers to zero.
+        this.attributes['GuessNote'] = noteGuess;
+        this.attributes['NumberCorrect'] = 0;
+
+        this.emit(':ask', noteGameMessage, noteGameReminder);
+    },
+    'RespondNoteGuess': function() {
+        console.log("Game Guessed");
+        const slots    = this.event.request.intent.slots;
+        const session  = this.event.session.attributes;
+        var numCorrect = session.NumberCorrect;
+
+        // verify that a note has been generated
+        if (session.GuessNote) {
+            // sometimes Alexa appends a period after the letter - remove if that is the case.
+            var note = slots.MusicNotes.value;
+            if (note[1]==".") {
+                console.log("Removed extra period");
+                note = note[0];
+            }
+
+            // these aren't yet part of the game - so should be removed from any guesses
+            var accidental = "";
+            if (slots.MusicAccidental) {
+                accidental = slots.MusicAccidental.value;
+            }
+
+            // replay the original note, then determine if answer was correct
+            var musicGuessMessage = "Here was the note I played" +
+                "<audio src=" + musicNoteFolder + session.GuessNote + ".mp3\" />";
+            if (note) {
+                musicGuessMessage = musicGuessMessage + "You guessed " + note + ". ";
+                if (session.GuessNote.toLowerCase() === note.toLowerCase()) {
+                    console.log("User Guessed Correct: " + note);
+                    numCorrect += 1;
+                    musicGuessMessage = musicGuessMessage + "You are correct! ";
+                    // only add this if a streak of more than one right answer is in-progress
+                    if (numCorrect > 1) {
+                        musicGuessMessage = musicGuessMessage + "That makes " + numCorrect + " in a row. " +
+                        "<say-as interpret-as=\"interjection\">way to go!</say-as>" +
+                        "<break time=\"1s\"/>";
+                    }
+                    this.attributes['NumberCorrect'] = numCorrect;
+                } else {
+                    console.log("User Guessed Incorrect: " + note + " Correct Answer: " +
+                        session.GuessNote);
+                    musicGuessMessage = musicGuessMessage +
+                        "<say-as interpret-as=\"interjection\">aw man</say-as>" + "<break time=\"0.5s\"/>" +
+                        "Sorry, the correct answer is " + session.GuessNote + "." + "<break time=\"1s\"/>";
+                    this.attributes['NumberCorrect'] = 0;
+                }
+            } else {
+                console.log("No note provided in the answer.");
+                musicGuessMessage = musicGuessMessage + "You didn't provide a guess. " +
+                    "The correct answer was " + session.GuessNote + ". ";
+                this.attributes['NumberCorrect'] = 0;
+            }
+
+            // generate the next question and save for the next round
+            const noteGuess = generateRandomNote().noteGuess;
+            this.attributes['GuessNote'] = noteGuess;
+
+            musicGuessMessage = musicGuessMessage + "Let's try another round. " +
+                "Here is the next note." +
+                "<break time=\"1s\"/>" +
+                "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+                "<break time=\"1s\"/>" +
+                "What note do you think it is? For example, say 'That is an F.'";
+            var musicReminderMessage = "Here is the next note to guess. " +
+                "<break time=\"1s\"/>" +
+                "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
+                "<break time=\"1s\"/>" +
+                "Remember, form your guess as a statement. For example, say 'That is an F.'";
+
+            this.emit(':ask', musicGuessMessage, musicReminderMessage);
+
+        } else {
+            // game is not inn session - provide error message
+            this.emit(':ask', noGameMessage, noGameReminderMessage);
+        }
+    },
+    'PlayChordExplanation': function() {
+        console.log("Explain what a chord is.");
+
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+        var message = 'A chord is a group of at least three notes that can be played ' +
+            'together and form the harmony. These are typically played with ' +
+            'your left hand while your right hand plays the melody. ' +
+            'An example is the Chord C Major. It is the C, E, and G notes played together ' +
+            'like this.' +
+            '<break time="1s"/>' +
+            '<audio src=\"' + chordExample + '\" />' +
+            '<break time="1s"/>' +
+            'These keys are pressed with your pinky, middle finger, and thumb. ' +
+            'If you would like to learn how to play a song, say List Songs to get started.';
+
+        this.emit(':ask', message, repromptChordMessage);
+    },
+    'ScreenSongSelected': function() {
+        console.log("Element Selected:" + this.event.request.token);
+        var videoName = "";
+        // match token to song name and find the video object to play
+        for (i = 0; i < songs.length; i++ ) {
+            if (songs[i].token === this.event.request.token) {
+                console.log("Play " + songs[i].requestName);
+                videoName = songs[i].videoObject;
+            }
+        }
+        const videoClip = videoLoc + videoName;
+        this.response.playVideo(videoClip);
+        this.emit(':responseReady');
+    },
+    'PlayLessonList': function() {
+        console.log("List available lessons");
+
+        var message = "Here are the lessons currently available. ";
+        var repromptMessage = "Would you like me to teach you a lesson? " +
+            "Just say something like, Teach me how to play the scale.";
+
+        console.log("Build lessons list");
+        // get all of the valid lesson names from the array
+        for (i = 0; i < lessons.length; i++ ) {
+            message = message + lessons[i].requestName + ", "
+        }
+        message = message + "Just say something like, Teach me how to play " +
+            " the scale.";
+
+        this.emit(':ask', message, repromptMessage);
+    },
+    'PlaySongList': function() {
 	console.log("List available songs.");
 	
 	var message = "Here are the songs currently available. ";
@@ -559,157 +605,8 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
 	    this.emit(':ask', message, repromptMessage);
         }
-    },
-    // this is the function that lists off what lessons are available
-    'ListLessons': function() {
-        console.log("List available lessons");
-
-        var message = "Here are the lessons currently available. ";
-        var repromptMessage = "Would you like me to teach you a lesson? " +
-            "Just say something like, Teach me how to play the scale.";
-
-        console.log("Build lessons list");
-        // get all of the valid lesson names from the array
-        for (i = 0; i < lessons.length; i++ ) {
-            message = message + lessons[i].requestName + ", "
-        }
-        message = message + "Just say something like, Teach me how to play " +
-            " the scale.";
-
-        this.emit(':ask', message, repromptMessage);
-    },
-    // this is the function that describes what a chord is
-    'ExplainChords': function() {
-        console.log("Explain what a chord is.");
-
-        var message = 'A chord is a group of at least three notes that can be played ' +
-            'together and form the harmony. These are typically played with ' +
-            'your left hand while your right hand plays the melody. ' +
-            'An example is the Chord C Major. It is the C, E, and G notes played together ' +
-            'like this.' +
-            '<break time="1s"/>' +
-            '<audio src=\"' + chordExample + '\" />' +
-            '<break time="1s"/>' +
-            'These keys are pressed with your pinky, middle finger, and thumb. ' +
-            'If you would like to learn how to play a song, say List Songs to get started.';
-
-        this.emit(':ask', message, repromptChordMessage);
-    },
-    'SessionEndedRequest': function() {
-	console.log("Session ended");
-	this.emit(':tell', goodbyeMessage);
-    },
-    // this starts a new note game
-    'PlayNoteGame': function() {
-	console.log("Play Note Game Requested.");
-
-	// generate random note and provide to student
-	const noteGuess = generateRandomNote().noteGuess;
-
-	var noteGameMessage = "This is a note game. I will play a note on the musical " +
-	    "scale, then you can guess which one it is. Please answer in the form of a " +
-	    "sentance so I can hear you correct. For example, say That is a D." +
-	    "<break time=\"1s\"/>" +
-	    "<say-as interpret-as=\"interjection\">good luck!</say-as>" +
-	    "<break time=\"1s\"/>" +
-	    "Here is the first note." +
-	    "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
-	    "<break time=\"1s\"/>" +
-	    "Now go ahead and guess what it is, and say it in the form of a statement. " +
-	    "For example, say 'That is a D.'";
-	var noteGameReminder = "Here is the note once again." +
-            "<break time=\"1s\"/>" +
-            "<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
-	    "Please guess when ready, and make sure to do it in the form of a statement. " +
-	    "For example, say 'That is a D.'";
-
-	// save the note to be guessed, and set the string of correct answers to zero.
-	this.attributes['GuessNote'] = noteGuess;
-	this.attributes['NumberCorrect'] = 0;
-
-	this.emit(':ask', noteGameMessage, noteGameReminder);
-    },
-    'MusicGuess': function() {
-	console.log("Game Guessed");
-	const slots    = this.event.request.intent.slots;
-	const session  = this.event.session.attributes;
-	var numCorrect = session.NumberCorrect;
-
-	// verify that a note has been generated
-	if (session.GuessNote) {
-	    // sometimes Alexa appends a period after the letter - remove if that is the case.
-            var note = slots.MusicNotes.value;
-    	    if (note[1]==".") {
-		console.log("Removed extra period");
-                note = note[0];
-    	    }
-
-	    // these aren't yet part of the game - so should be removed from any guesses
-	    var accidental = "";
-	    if (slots.MusicAccidental) {
-	        accidental = slots.MusicAccidental.value; 	
-	    }
-
-	    // replay the original note, then determine if answer was correct
-	    var musicGuessMessage = "Here was the note I played" +
-	    	"<audio src=" + musicNoteFolder + session.GuessNote + ".mp3\" />";
-	    if (note) {
-	    	musicGuessMessage = musicGuessMessage + "You guessed " + note + ". ";
-            	if (session.GuessNote.toLowerCase() === note.toLowerCase()) {
-		    console.log("User Guessed Correct: " + note);
-		    numCorrect += 1;
-		    musicGuessMessage = musicGuessMessage + "You are correct! ";
-		    // only add this if a streak of more than one right answer is in-progress
-		    if (numCorrect > 1) {
-		    	musicGuessMessage = musicGuessMessage + "That makes " + numCorrect + " in a row. " +
-            	    	"<say-as interpret-as=\"interjection\">way to go!</say-as>" +
-			"<break time=\"1s\"/>";
-		    }
-		    this.attributes['NumberCorrect'] = numCorrect;
-	        } else {
-		    console.log("User Guessed Incorrect: " + note + " Correct Answer: " + 
-		        session.GuessNote);
-		    musicGuessMessage = musicGuessMessage +
-            	    	"<say-as interpret-as=\"interjection\">aw man</say-as>" + "<break time=\"0.5s\"/>" +
-		    	"Sorry, the correct answer is " + session.GuessNote + "." + "<break time=\"1s\"/>";
-		    this.attributes['NumberCorrect'] = 0;
-	        }
-	    } else {
-		console.log("No note provided in the answer.");
-		musicGuessMessage = musicGuessMessage + "You didn't provide a guess. " +
-		    "The correct answer was " + session.GuessNote + ". ";
-		this.attributes['NumberCorrect'] = 0;
-	    }
-
-            // generate the next question and save for the next round
-            const noteGuess = generateRandomNote().noteGuess;
-            this.attributes['GuessNote'] = noteGuess;
-
-	    musicGuessMessage = musicGuessMessage + "Let's try another round. " +
-	    	"Here is the next note." + 
-		"<break time=\"1s\"/>" +
-            	"<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
-		"<break time=\"1s\"/>" +
-		"What note do you think it is? For example, say 'That is an F.'";
-	    var musicReminderMessage = "Here is the next note to guess. " +
-            	"<break time=\"1s\"/>" +
-            	"<audio src=" + musicNoteFolder + noteGuess + ".mp3\" />" +
-                "<break time=\"1s\"/>" +
-		"Remember, form your guess as a statement. For example, say 'That is an F.'";
-
-	    this.emit(':ask', musicGuessMessage, musicReminderMessage);
-
-        } else {
-	    // game is not inn session - provide error message
-	    this.emit(':ask', noGameMessage, noGameReminderMessage);
-	}
-    },
-    'Unhandled': function () {
-    	console.log("Unhandled event");
-        console.log(JSON.stringify(this.event));
-        this.emit(':ask', unhandledMessage, unhandledMessage);
     }
-});
+};
 
 // this function generates a random musical note
 function generateRandomNote() {
