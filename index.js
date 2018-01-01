@@ -47,6 +47,11 @@ const noSongMessage = "Sorry, I didn't hear a song name. Which song do you want 
 const noSongRepeatMessage = "Would you like me to teach you a song? If so, please provide me " +
     "the song name. For example, say something like, Teach me how to play Twinkle Twinkle Little Star.";
 
+// this is the message after the chord lesson is taught
+const repromptChordMessage = "Would you like to learn another lesson? If so, " +
+    "please say something like, List Lessons, and I will read out what is " +
+    "currently available.";
+
 // This is the goodbye message when the user has asked to quit the game
 const goodbyeMessage = "Ok, see you next time!";
 
@@ -62,6 +67,7 @@ const pianoStrings = 'https://s3.amazonaws.com/pianoplayerskill/logos/pianoStrin
 const audioLoc = 'https://s3.amazonaws.com/pianoplayerskill/audio/';
 const videoLoc = 'https://s3.amazonaws.com/pianoplayerskill/media/';
 const musicNoteFolder = "\"https://s3.amazonaws.com/pianoplayerskill/musicNotes/";
+const chordExample = 'https://s3.amazonaws.com/pianoplayerskill/musicChords/CMajorChord.mp3';
 
 // --------------- Handlers -----------------------
 
@@ -281,7 +287,7 @@ var newSessionHandler = {
         this.handler.state = states.STARTMODE;
 
         var message = "Here are the lessons currently available. ";
-        var repromptMessage = "Would you like me to teach you a lesson? " +
+        const repromptListLessonMessage = "Would you like me to teach you a lesson? " +
             "Just say something like, Teach me how to play the scale.";
 
         console.log("Build lessons list");
@@ -292,8 +298,28 @@ var newSessionHandler = {
         message = message + "Just say something like, Teach me how to play " +
             " the scale.";
 
-        this.emit(':ask', message, repromptMessage);
+        this.emit(':ask', message, repromptListLessonMessage);
     },
+    // this is the function that describes what a chord is
+    'ExplainChords': function() {
+	console.log("Explain what a chord is.");
+	
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+	var message = 'A chord is a group of at least three notes that can be played ' +
+	    'together and form the harmony. These are typically played with ' +
+	    'your left hand while your right hand plays the melody. ' +
+	    'An example is the Chord C Major. It is the C, E, and G notes played together ' +
+	    'like this.' +
+            '<break time="1s"/>' +
+            '<audio src=\"' + chordExample + '\" />' +
+            '<break time="1s"/>' +
+	    'These keys are pressed with your pinky, middle finger, and thumb. ' +
+	    'If you would like to learn how to play a song, say List Songs to get started.';
+
+	this.emit(':ask', message, repromptChordMessage);
+    },	
     'Unhandled': function () {
         console.log("Unhandled event");
         console.log(JSON.stringify(this.event));
@@ -544,6 +570,23 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
             " the scale.";
 
         this.emit(':ask', message, repromptMessage);
+    },
+    // this is the function that describes what a chord is
+    'ExplainChords': function() {
+        console.log("Explain what a chord is.");
+
+        var message = 'A chord is a group of at least three notes that can be played ' +
+            'together and form the harmony. These are typically played with ' +
+            'your left hand while your right hand plays the melody. ' +
+            'An example is the Chord C Major. It is the C, E, and G notes played together ' +
+            'like this.' +
+            '<break time="1s"/>' +
+            '<audio src=\"' + chordExample + '\" />' +
+            '<break time="1s"/>' +
+            'These keys are pressed with your pinky, middle finger, and thumb. ' +
+            'If you would like to learn how to play a song, say List Songs to get started.';
+
+        this.emit(':ask', message, repromptChordMessage);
     },
     'SessionEndedRequest': function() {
 	console.log("Session ended");
