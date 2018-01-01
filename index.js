@@ -11,6 +11,9 @@ const makeImage     = Alexa.utils.ImageUtils.makeImage;
 // these are the songs that recordings have been made for
 var songs = require("songs.json");
 
+// these are the lessons that invoke different intents
+var lessons = require("lessons.json");
+
 // valid states in the skill
 var states = {
     STARTMODE: '_STARTMODE'
@@ -33,7 +36,10 @@ const promptToStartMessage = "Say something like, List Songs, to get started.";
 // this is the help message during the setup at the beginning of the game
 const helpMessage = "This skill has the ability to provide beginner lessons for the piano. " +
     "To begin, say, Teach me how to play the scale, and I will go through the individual " +
-    "notes on a scale. There are also many different songs that I can teach. Say, List Songs " +
+    "notes on a scale. " +
+    "As you are beginning to learn musical notes, see how well you can recognize them " +
+    "by saying 'Play musical note guessing game' and see how many notes in a row you can recognize. " +
+    "There are also many different songs that I can teach. Say, List Songs " +
     "for a complete list, then ask me to teach you one, and I will provide the notes to go along.";
 
 // these are messages when a song requested was invalid
@@ -267,6 +273,27 @@ var newSessionHandler = {
 
 	this.emit(':ask', message, repromptMessage);
     },
+    // this is the function that lists off what lessons are available
+    'ListLessons': function() {
+	console.log("List available lessons");
+
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+
+        var message = "Here are the lessons currently available. ";
+        var repromptMessage = "Would you like me to teach you a lesson? " +
+            "Just say something like, Teach me how to play the scale.";
+
+        console.log("Build lessons list");
+        // get all of the valid lesson names from the array
+        for (i = 0; i < lessons.length; i++ ) {
+            message = message + lessons[i].requestName + ", "
+        }
+        message = message + "Just say something like, Teach me how to play " +
+            " the scale.";
+
+        this.emit(':ask', message, repromptMessage);
+    },
     'Unhandled': function () {
         console.log("Unhandled event");
         console.log(JSON.stringify(this.event));
@@ -499,6 +526,24 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
 
 	    this.emit(':ask', message, repromptMessage);
         }
+    },
+    // this is the function that lists off what lessons are available
+    'ListLessons': function() {
+        console.log("List available lessons");
+
+        var message = "Here are the lessons currently available. ";
+        var repromptMessage = "Would you like me to teach you a lesson? " +
+            "Just say something like, Teach me how to play the scale.";
+
+        console.log("Build lessons list");
+        // get all of the valid lesson names from the array
+        for (i = 0; i < lessons.length; i++ ) {
+            message = message + lessons[i].requestName + ", "
+        }
+        message = message + "Just say something like, Teach me how to play " +
+            " the scale.";
+
+        this.emit(':ask', message, repromptMessage);
     },
     'SessionEndedRequest': function() {
 	console.log("Session ended");

@@ -1,0 +1,26 @@
+[
+	{
+		"requestName": "Play the Scale",
+		"listSong":true,
+		"token":"lesson001",
+		"difficulty":"Easy",
+		"videoObject": "Default.mp4",
+		"audioObject": "Default.mp3"
+	},
+	{
+		"requestName": "Play Scale in Reverse",
+                "listSong":true,
+                "token":"lesson002",
+                "difficulty":"Easy",
+		"videoObject": "Default.mp4",
+		"audioObject": "Default.mp3"
+	},
+	{
+		"requestName": "Teach me a Chord",
+                "listSong":true,
+                "token":"lesson003",
+                "difficulty":"Easy",
+		"videoObject": "Default.mp4",
+		"audioObject": "Default.mp3"
+	}
+]
