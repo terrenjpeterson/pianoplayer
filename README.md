@@ -14,6 +14,7 @@ Learn how to play the piano using this Alexa skill. With the Echo Show, it can p
 - [Where are the songs cataloged?](#data-in-song-list)
 - [What event gets created when touching the Echo screen?](#event-triggered-by-touching-echo)
 - [How did you create the videos with keys labeled?](#how-to-create-videos-with-camtasia)
+- [How do you play audio files on any Alexa?](#how-to-play-audio-files-on-alexa)
 - [How do you deploy changes to the skill from the command line?](#lambda-deployment-process)
 
 ## Play Video Custom Skill
@@ -37,8 +38,9 @@ Transfer then controls over to the video player, and then the user can control t
 
 When playing a video, the user can pause, rewind, fast-forward, etc. on the video file that is being played.
 This can be done through voice commands, or by touching the Echo Screen.
-Please note: these commands do not trigger events that invoke your skill. Rather the device handles them directly with the video file.
+Please note: these commands do not require responses that invoke your skill. The device can handle them directly with the video file.
 This ensures a consistent user experience across skills, or the native video experience on the device.
+For more details on the Video App, [here](https://developer.amazon.com/docs/custom-skills/videoapp-interface-reference.html) is the documentation from Amazon.
 
 ## Recognize Skill Requestor
 
@@ -211,6 +213,35 @@ If there are multiple notes being played at once, then there are multiple images
 When complete, Camtasia builds an mp4 file that is in a compatible format for playing on an Echo Show.
 We also create an mp3 file that can be used for non-video devices that use the skill.
 These are uploaded to an s3 bucket, and are made publicly available so they can be rendered by the Alexa device.
+
+## How to Play Audio Files on Alexa
+
+All Alexa devices have the ability to play back mp3 files in addition to the spoken word.
+This requires using SSML (Speech Synthesis Markup Language).
+For example, when playing the note recognition game, here is the attribute that plays a single chord.
+
+```sh
+const chordExample = 'https://s3.amazonaws.com/pianoplayerskill/musicChords/CMajorChord.mp3';
+
+var message = 'A chord is a group of at least three notes that can be played ' +
+    'together and form the harmony. These are typically played with ' +
+    'your left hand while your right hand plays the melody. ' +
+    'An example is the Chord C Major. It is the C, E, and G notes played together ' +
+    'like this.' +
+    '<break time="1s"/>' +
+    '<audio src=\"' + chordExample + '\" />' +
+    '<break time="1s"/>' +
+    'These keys are pressed with your pinky, middle finger, and thumb. ' +
+    'If you would like to learn how to play a song, say List Songs to get started.';
+
+this.emit(':ask', message, repromptChordMessage);
+
+```
+
+The markup syntax can mix both the natural voice of Alexa with mp3 files. Just include the endpoint of the mp3 file with the 'audio src' markup.
+An easy way to host audio files is through an s3 bucket.
+The markup can also add breaks up to ten seconds in length. That is through the 'break time' markup.
+
 
 ## Lambda Deployment Process
 
