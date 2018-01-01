@@ -204,11 +204,13 @@ Here is a screenshot of Camtasia that highlights this.
 
 ![](https://s3.amazonaws.com/pianoplayerskill/logos/camtasia.png)
 
-In making the videos, the base layer is a photograph. By bringing in the audio from playing the piano, we get a timeline that shows each note being played in the mp3 file.
-By the curve within the wave, we can tell when each note on the piano is struck, so we add another layer that highlights which note is being played.
-If there are multiple notes being played at once, then there are multiple images.
+In making the videos, the base layer is a photograph(Track 1). By bringing in the audio from playing the piano (Track 2), we get a timeline that shows each note being played in the mp3 file.
+By the curve within the wave, we can tell when each note on the piano is struck, so we add another layer (Track 3) that highlights which note is being played.
+If there are multiple notes being played at once, then there are multiple images. Any titles at the beginning are another layer (Track 4).
+
 When complete, Camtasia builds an mp4 file that is in a compatible format for playing on an Echo Show.
 We also create an mp3 file that can be used for non-video devices that use the skill.
+These are uploaded to an s3 bucket, and are made publicly available so they can be rendered by the Alexa device.
 
 ## Lambda Deployment Process
 
