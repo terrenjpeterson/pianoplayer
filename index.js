@@ -9,10 +9,10 @@ const makePlainText = Alexa.utils.TextUtils.makePlainText;
 const makeImage     = Alexa.utils.ImageUtils.makeImage;
 
 // these are the songs that recordings have been made for
-var songs = require("songs.json");
+var songs = require("data/songs.json");
 
 // these are the lessons that invoke different intents
-var lessons = require("lessons.json");
+var lessons = require("data/lessons.json");
 
 // valid states in the skill
 var states = {
@@ -185,6 +185,12 @@ var newSessionHandler = {
         this.handler.state = states.STARTMODE;
         this.emit('PlayLessonList');
     },
+    // this is the function that explains the key signature
+    'LearnKeySignature': function() {
+        // move next utterance to use start mode
+        this.handler.state = states.STARTMODE;
+        this.emit('PlayKeySignExplanation');
+    },
     // this is the function that describes what a chord is
     'ExplainChords': function() {
         // move next utterance to use start mode
@@ -265,6 +271,9 @@ var startLessonHandlers = Alexa.CreateStateHandler(states.STARTMODE, {
     // this is the function that describes what a chord is
     'ExplainChords': function() {
 	this.emit('PlayChordExplanation');
+    },
+    'LearnKeySignature': function() {
+	this.emit('PlayKeySignExplanation');
     },
     'SessionEndedRequest': function() {
 	console.log("Session ended");
@@ -506,9 +515,6 @@ var commonHandlers = {
     'PlayChordExplanation': function() {
         console.log("Explain what a chord is.");
 
-        // move next utterance to use start mode
-        this.handler.state = states.STARTMODE;
-
         var message = 'A chord is a group of at least three notes that can be played ' +
             'together and form the harmony. These are typically played with ' +
             'your left hand while your right hand plays the melody. ' +
@@ -521,6 +527,31 @@ var commonHandlers = {
             'If you would like to learn how to play a song, say List Songs to get started.';
 
         this.emit(':ask', message, repromptChordMessage);
+    },
+    'PlayKeySignExplanation': function() {
+	console.log("Explain what a key signature is.");
+
+	const message = "A key signature is a set of symbols placed together on the staff. " +
+	    "It designates the notes that are to be played higher or lower than the corresponding " +
+	    "natural notes and applies through to the end of the piece or up to the next key signature. " +
+	    "In Western Music, the most common key signature is named C Major. " +
+	    "This is where there are no adjustments to the natural notes. " +
+	    "On a piano keyboard, this means that no black keys will be required, which " +
+	    "simplifies learning for beginners. " +
+	    "The black keys are sometimes referred to as sharps and flats, and when to use them " +
+	    "is driven by the key signature that is printed at the beginning of the sheet music. " +
+	    "Another common key signature is F Major. This key has one adjustment to the natural notes. " +
+	    "The B pitch is adjusted lower, and noted as B flat. " +
+	    "On the piano, this means that the black key to the left of the natural white B key " +
+	    "is to be played whenever a b note appears on the sheet music. " +
+	    "<break time=\"1s\"/>" +
+	    "If you would like to hear another lesson, please say 'List Lessons' and I will provide " +
+	    "options to learn more.";
+
+	const repromptKeySignMessage = "Would you like to learn another lesson? Just say, " +
+	    "'List Lessons', and I will provide you different options to learn.";
+
+	this.emit(':ask', message, repromptKeySignMessage);
     },
     'ScreenSongSelected': function() {
         console.log("Element Selected:" + this.event.request.token);

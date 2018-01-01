@@ -1,7 +1,6 @@
 [
 	{
 		"requestName": "Play the Scale",
-		"listSong":true,
 		"token":"lesson001",
 		"difficulty":"Easy",
 		"videoObject": "Default.mp4",
@@ -9,7 +8,6 @@
 	},
 	{
 		"requestName": "Play Scale in Reverse",
-                "listSong":true,
                 "token":"lesson002",
                 "difficulty":"Easy",
 		"videoObject": "Default.mp4",
@@ -17,10 +15,16 @@
 	},
 	{
 		"requestName": "Teach me a Chord",
-                "listSong":true,
                 "token":"lesson003",
-                "difficulty":"Easy",
+                "difficulty":"Moderate",
 		"videoObject": "Default.mp4",
 		"audioObject": "Default.mp3"
-	}
+	},
+        {
+                "requestName": "What is a Key Signature",
+                "token":"lesson004",
+                "difficulty":"Moderate",
+                "videoObject": "Default.mp4",
+                "audioObject": "Default.mp3"
+        }
 ]
