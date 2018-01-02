@@ -1,0 +1,50 @@
+{
+  "session": {
+    "new": false,
+    "sessionId": "SessionId.38e03579-c8dc-420d-9b8e-3dafa02138c7",
+    "application": {
+      "applicationId": "amzn1.ask.skill.1de392e9-962b-4a51-9e53-e7001299efa3"
+    },
+    "attributes": {
+      "NumberCorrect": 2,
+      "EchoShow": true,
+      "STATE": "_STARTMODE",
+      "GuessNote": "c"
+    },
+    "user": {
+      "userId": "amzn1.ask.account.A123"
+    }
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.86a8264d-4ce4-4e6a-9aee-deb743fbcf14",
+    "intent": {
+      "name": "ListLessons",
+      "slots": {}
+    },
+    "locale": "en-US",
+    "timestamp": "2018-01-02T03:20:30Z"
+  },
+  "context": {
+    "AudioPlayer": {
+      "playerActivity": "IDLE"
+    },
+    "System": {
+      "application": {
+        "applicationId": "amzn1.ask.skill.1de392e9-962b-4a51-9e53-e7001299efa3"
+      },
+      "user": {
+        "userId": "amzn1.ask.account.A123"
+      },
+      "device": {
+        "supportedInterfaces": {
+          "Display": {
+            "templateVersion": "1",
+            "markupVersion": "1"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
