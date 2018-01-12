@@ -2,6 +2,8 @@
 
 Learn how to play the piano using this Alexa skill. With the Echo Show, it can play videos showing the individual keys to be played for songs on the piano.
 
+For a demo of this skill, check out the entry in the [DevPost Alexa Contest](https://devpost.com/software/piano-teacher-using-echo-show).
+
 ![](/logos/logo108x108.png)
 
 **Architecture**
